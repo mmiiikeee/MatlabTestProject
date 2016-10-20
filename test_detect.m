@@ -306,11 +306,26 @@ if strcmp(m_type, 'normal')
         handles.figSeil2 = [];
     elseif handles.Counter == 2
         delete(handles.dete(1));
-        
+        if ~handles.SelectType 
+                set(hObject,'WindowButtonMotionFcn','');
+                set(handles.figure1,'WindowButtonDownFcn','');
+                handles.Remem3 = [handles.Remem3 ; handles.Remem];
+                handles.Selected = [handles.Selected ; handles.SelectTemp(1,:)];
+                jshjkhsk = handles.Selected
+        end
+        handles.figSeil(1,:) = handles.figSeil2;
+        handles.figSeil2 = [];
         handles.figSeil3 = [];
-    elseif handles.Counter == 3
-        set(hObject,'WindowButtonMotionFcn','');
-        set(handles.figure1,'WindowButtonDownFcn','');
+    elseif handles.Counter >= 2 
+        if handles.SelectType(handles.Counter - 1) == 0
+            set(hObject,'WindowButtonMotionFcn','');
+            set(handles.figure1,'WindowButtonDownFcn','');
+            delete(handles.figSeil);
+            return;
+        else
+            handles.figSeil(handles.Counter - 1,:) = handles.figSeil3(2);
+            handles.figSeil3 = [];
+        end
     end
     handles.nukber = 0;
     set(handles.figure1, 'selectionType','open');
@@ -384,7 +399,7 @@ elseif handles.Counter == 1
             handles.figSeil2(2) = plot([handles.KreisPosi(i,1) handles.Remem(1,1)],[handles.KreisPosi(i,2) handles.Remem(1,2)],'b');
         end
     end
-elseif handles.Counter == 2
+elseif handles.Counter >= 2
     delete(handles.dete);
     if ~isempty(handles.figSeil3)
 %             delete(handles.Seil(handles.Counter));
@@ -429,6 +444,7 @@ elseif handles.Counter == 2
                         handles.figSeil3(1) = plot(pos(1),pos(2),'bo');
                         [handles.figSeil3(2)] = drawSpring(punkt(handles.SelectType(handles.Counter - 1),1),punkt(handles.SelectType(handles.Counter - 1),2),pos(1),pos(2),handles,0,handles.FederIsOn,handles.axes1);%%%
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(handles.Counter - 1),1),punkt(handles.SelectType(handles.Counter - 1),2),'bo');
+                        handles.SelectType(handles.Counter) = 0;
                     end
                     handles.nukber = handles.nukber + 1;
                 elseif norm(pos - handles.KreisPosi(i,:))> handles.KreisRadius(i)*0.618 %&& i~=handles.SelectKreis1
@@ -505,6 +521,7 @@ elseif handles.Counter == 2
                 else %if (norm(pos - handles.KreisPosi(i,:)) < handles.KreisRadius(i)*0.618) %&& i~=handles.SelectKreis1
                     handles.figSeil3(1) = plot(handles.KreisPosi(i,1) , handles.KreisPosi(i,2),'bo');
                     handles.figSeil3(2) = plot([handles.KreisPosi(i,1) handles.Remem(1,1)],[handles.KreisPosi(i,2) handles.Remem(1,2)],'b');
+                    handles.SelectType(handles.Counter) = 0;
                 end
             end
         end
@@ -522,7 +539,7 @@ for i = 1:dimLager(1)
         if handles.Counter == 1
             delete(handles.figSeil2);
             handles.figSeil2 = plot([handles.LagerPos(i,1) handles.Remem(1,1)],[handles.LagerPos(i,2) handles.Remem(1,2)],'b');
-        elseif handles.Counter == 2 && handles.SelectType(handles.Counter - 1)
+        elseif handles.Counter >= 2 && handles.SelectType(handles.Counter - 1)
             delete(handles.figSeil3);
             vec = handles.KreisPosi(handles.SelectKreis(handles.Counter-1),:)-handles.LagerPos(i,:);
             beta = asin(vec(2)/norm(vec));
@@ -536,6 +553,7 @@ for i = 1:dimLager(1)
 %             handles.figSeil3(2) = plot([punkt(handles.SelectType,1) handles.LagerPos(i,1)],[punkt(handles.SelectType,2) handles.LagerPos(i,2)],'b');
             [handles.figSeil3(2)] = drawSpring(punkt(handles.SelectType(handles.Counter - 1),1),punkt(handles.SelectType(handles.Counter - 1),2),handles.LagerPos(i,1),handles.LagerPos(i,2),handles,0,handles.FederIsOn,handles.axes1);
             handles.figSeil3(3) = plot(punkt(handles.SelectType(handles.Counter - 1),1),punkt(handles.SelectType(handles.Counter - 1),2),'bo');
+            handles.SelectType(handles.Counter) = 0;
         end
 
         
