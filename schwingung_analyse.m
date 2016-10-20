@@ -22,7 +22,7 @@ function varargout = schwingung_analyse(varargin)
 
 % Edit the above text to modify the response to help schwingung_analyse
 
-% Last Modified by GUIDE v2.5 10-Sep-2016 11:05:12
+% Last Modified by GUIDE v2.5 09-Sep-2016 13:16:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -149,10 +149,22 @@ handles.abroll3=0;
 handles.abroll4=0;
 handles.bez_koerper1=110;
 handles.bez_koerper2=110;
-handles.LagerPos = [];
- guidata(hObject, handles);
+guidata(hObject, handles);
+rotation_rollen2=0;
+rotation_rollen3=0;
+handles.rotation_rollen2=0;
+handles.rotation_rollen3=0;
+POS_Koerper_t0=[];
+handles.POS_Koerper_t0=POS_Koerper_t0;
+handles.drehung2=0;
 
 
+handles.Kreis_Info=[];
+handles.Lager_Info=[];
+handles.Koordinate_Info=[];
+handles.h=[];
+handles.Rechteck_Info=[];
+guidata(hObject, handles);
 
 
 % UIWAIT makes schwingung_analyse wait for user response (see UIRESUME)
@@ -181,7 +193,6 @@ axes(handles.kosy);
 cla(handles.kosy,'reset');
 newString=0;
 set(handles.counter, 'String', newString );
-set(handles.punkte,'Data',{'1','1';'11','1'});
 
 
 % --- Executes on button press in ok.
@@ -729,6 +740,7 @@ function ok_rechteck_Callback(hObject, eventdata, handles)
 counter5=str2double(get(handles.counter5,'string'));
 guidata(hObject, handles);
 a=handles.a;
+Rechteck_Info=handles.Rechteck_Info;
 if counter5==1; 
     object1=0; %kosy enthält ein Rechteck
     ln1=str2double(get(handles.l,'string'));% Auslesen der Eingaben
@@ -749,7 +761,9 @@ if counter5==1;
     m=handles.m;
     b=handles.b;
     handles.RechteckPos=[xn1 yn1];
-     handles.RechteckGroesse=[ln1 bn1 w1];
+    handles.RechteckGroesse=[ln1 bn1 w1];
+    Rechteck_Info(1,:)=[ xn1 , yn1 , ln1 , bn1 , w1 , 0 ];
+     
     
 %     set(gca,'ytick',[]);
 %     set(gca, 'Visible', 'off');
@@ -792,6 +806,8 @@ elseif counter5==2
     handles.yn2=yn2;
     handles.object2=object2;
     
+    Rechteck_Info(2,:)=[ xn2 , yn2 , ln2 , bn2 , w2 , 0 ];
+    
     
     
 elseif counter5==3
@@ -824,12 +840,50 @@ elseif counter5==3
     handles.xn3=xn3;
     handles.yn3=yn3;
     handles.object3=object3;
+    Rechteck_Info(3,:)=[ xn3 , yn3 , ln3 , bn3 , w3 , 0 ];
+    
+  elseif counter5==4
+    object4=0; %kosy enthält ein Rechteck
+    ln4=str2double(get(handles.l,'string'));% Auslesen der Eingaben
+    w4=str2double(get(handles.w,'string'))/360*2*pi;
+    bn4=str2double(get(handles.b,'string'));
+    xn4=str2double(get(handles.x,'string'));
+    yn4=str2double(get(handles.y,'string'));
+    %ln1=l1/(a+a/10+1)*12,6; %Anpassung der Dimensionen
+    %bn1=b1/(a+a/10+1)*12,6;
+    %xn1=x1/(a+a/10+1)*12,6;
+    %yn1=y1/(a+a/10+1)*12,6;
+    axes(handles.kosy);
+    x=[xn4-cos(w4)*ln4/2-cos(pi/2-w4)*bn4/2 xn4-cos(w4)*ln4/2+cos(pi/2-w4)*bn4/2  xn4+cos(w4)*ln4/2+cos(pi/2-w4)*bn4/2 xn4+cos(w4)*ln4/2-cos(pi/2-w4)*bn4/2 ];
+    y=[yn4-sin(w4)*ln4/2+sin(pi/2-w4)*bn4/2 yn4-sin(w4)*ln4/2-sin(pi/2-w4)*bn4/2 yn4+sin(w4)*ln4/2-sin(pi/2-w4)*bn4/2 yn4+sin(w4)*ln4/2+sin(pi/2-w4)*bn4/2];
+    fill(x,y,'b');
+    xlim([0 a+a/10+1]);% Korrektur des Limits
+    ylim([0 a+a/10+1]);
+    m=handles.m;
+    b=handles.b;
+    handles.RechteckPos=[handles.RechteckPos ; xn4 yn4];
+     handles.RechteckGroesse=[handles.RechteckGroesse ; ln4 bn4 w4];
+%     set(gca,'ytick',[]);
+%     set(gca, 'Visible', 'off');
+    %hold on;
+    handles.ln4=ln4;%merken der Variablen
+    handles.w4=w4;
+    handles.bn4=bn4;
+    handles.xn4=xn4;
+    handles.yn4=yn4;
+    handles.object4=object4;
+    Rechteck_Info(4,:)=[ xn4 , yn4 , ln4 , bn4 , w4 , 0 ];  
+    
+    
+    
+    
+    
     
 end
 
 
 set(handles.rechteck_pos,'Visible','off');
-
+handles.Rechteck_Info=Rechteck_Info;
 guidata(hObject, handles);
 
 
@@ -905,24 +959,50 @@ function ok_gen_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
   guidata(hObject, handles);
   currentCounterValue3=handles.currentCounterValue3;
+  Koordinate_Info=handles.Koordinate_Info;
 if currentCounterValue3==0
 bez_koerper1=str2double(get(handles.gen_ko,'string'));% Auslesen des Bezugskörpers
 richtung1=str2double(get(handles.w_k,'string'))/360*2*pi% Auslesen der Richtung
 x1=str2double(get(handles.x_a,'string'))
 y1=str2double(get(handles.y_a,'string'))
+handles.generalisierte_KOordinate_X1=x1;
+handles.generalisierte_KOordinate_Y1=y1;
 a=handles.a;
 drehung=0; 
 handles.drehung1=drehung;
 handles.bez_koerper1=bez_koerper1;
+
+%Koordinate_Info(1,:)=[ x1 , y1 , Translation , Richtung , Positiv, neg]
+Koordinate_Info(1,:)=[ x1 , y1 , 1 , richtung1 , 0 , 0 ];
+
+handles.Koordinate_Info=Koordinate_Info;
 guidata(hObject, handles);
-    if bez_koerper1==1 %%%nur translation möglich
-        axes(handles.kosy);
+Kreis_Info=handles.Kreis_Info;
+
+
+%Zeichnen der Generalisierten Koordinate
+
+axes(handles.kosy);
         hold on;
         X=[x1 x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)-sin(richtung1)*a/40  x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)+sin(richtung1)*a/40];
         Y=[y1 y1+a/10*sin(richtung1) y1+a/40*cos(richtung1)+a*3/40*sin(richtung1) y1+a/10*sin(richtung1) y1-cos(richtung1)*a/40+a*3/40*sin(richtung1)];
         plot(X,Y,'k','LineWidth',2);
         xlim([0 a+a/10+1]);% Korrektur des Limits
         ylim([0 a+a/10+1]);
+
+%Anzahl der Kreise
+counter2=str2double(get(handles.counter2,'string')); 
+%Anzahl der Rechtecke
+counter5=str2double(get(handles.counter5,'string'));
+
+    if bez_koerper1==1 %%%nur translation möglich
+%         axes(handles.kosy);
+%         hold on;
+%         X=[x1 x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)-sin(richtung1)*a/40  x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)+sin(richtung1)*a/40];
+%         Y=[y1 y1+a/10*sin(richtung1) y1+a/40*cos(richtung1)+a*3/40*sin(richtung1) y1+a/10*sin(richtung1) y1-cos(richtung1)*a/40+a*3/40*sin(richtung1)];
+%         plot(X,Y,'k','LineWidth',2);
+%         xlim([0 a+a/10+1]);% Korrektur des Limits
+%         ylim([0 a+a/10+1]);
         handles.richtung11=richtung1;
         handles.x11=x1;
         handles.y11=y1;
@@ -931,6 +1011,18 @@ guidata(hObject, handles);
         handles.drehung1=drehung;
         guidata(hObject, handles);
         object1=handles.object1;
+        
+            if counter2~=0
+                
+                Kreis_Info(1,5)=1;
+                Kreis_Info(1,7)=1;
+                
+                
+            end
+        
+        
+        
+        
         % Berechnung der Anfangsbedingung
         if object1==1 %Kreis
         xn1kreis=handles.xn1kreis;
@@ -980,6 +1072,58 @@ guidata(hObject, handles);
                 end
         end
         
+    elseif bez_koerper1==2
+        
+        if counter2>=2
+            
+            Kreis_Info(2,5)=1;
+            Kreis_Info(2,7)=1;
+        else
+            
+            Rechteck_Info(2-counter2,6)=1;
+            
+        
+        end
+     
+   elseif bez_koerper1==3
+        
+        if counter2>=3
+            
+            Kreis_Info(3,5)=1;
+            Kreis_Info(3,7)=1;
+            
+        else
+            
+            Rechteck_Info(3-counter2,6)=1;
+            
+        end     
+        
+    elseif bez_koerper1==4
+        
+        if counter2>=4
+            
+            Kreis_Info(4,5)=1;
+            Kreis_Info(4,7)=1;
+            
+        else
+            
+            Rechteck_Info(4-counter2,6)=1;
+            
+        end         
+        
+     elseif bez_koerper1==5
+        
+        if counter2>=5
+            
+            Kreis_Info(5,5)=1;
+            Kreis_Info(5,7)=1;
+            
+        else
+            
+            Rechteck_Info(5-counter2,6)=1;
+            
+        end        
+        
     end
 
 
@@ -990,8 +1134,28 @@ elseif currentCounterValue3==1
     x2=str2double(get(handles.x_a,'string'))
     y2=str2double(get(handles.y_a,'string'))
     a=handles.a;
+    Koordinate_Info(2,:)=[ x2 , y2 , 1 , richtung2 , 0 , 0 ];
+    
+     hold on;
+        X=[x1 x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)-sin(richtung1)*a/40  x1+a/10*cos(richtung1) x1+a*3/40*cos(richtung1)+sin(richtung1)*a/40];
+        Y=[y1 y1+a/10*sin(richtung1) y1+a/40*cos(richtung1)+a*3/40*sin(richtung1) y1+a/10*sin(richtung1) y1-cos(richtung1)*a/40+a*3/40*sin(richtung1)];
+        plot(X,Y,'k','LineWidth',2);
+        xlim([0 a+a/10+1]);% Korrektur des Limits
+        ylim([0 a+a/10+1]);
+        
+        
+    
+    
+    
+    
+    
+    
+    
 end
   set(handles.gen_co,'Visible','off');  
+  handles.Kreis_Info=Kreis_Info;
+  handles.Koordinate_Info=Koordinate_Info
+  guidata(hObject, handles);
     
 
 
@@ -1068,10 +1232,48 @@ z2=str2double(get(handles.nnvdx,'string'));
 z3=str2double(get(handles.nnvy,'string'));
 z4=str2double(get(handles.nnvdy,'string'));
 
-format short
-start_generalisiertekoordinatex1= double(handles.start_generalisiertekoordinatex1)
-start_generalisiertekoordinatey1=  double(handles.start_generalisiertekoordinatey1)
+drehung1=0;
+drehung2=0;
 
+drehung1=handles.drehung1;
+%drehung2=handles.drehung2;
+
+
+format short
+%start_generalisiertekoordinatex1= double(handles.start_generalisiertekoordinatex1)
+%start_generalisiertekoordinatey1=  double(handles.start_generalisiertekoordinatey1)
+
+
+Lager_Info=handles.Lager_Info;
+Kreis_Info=handles.Kreis_Info;
+Rechteck_Info=handles.Rechteck_Info;
+Koordinate_Info=handles.Koordinate_Info;
+
+
+Anzahl_der_Kreise=size(Kreis_Info)
+Anzahl_der_Lager=size(Lager_Info)
+
+h=handles.h;
+
+
+%befindet sich ein Lager in der Mitte des Kreises?!
+if Anzahl_der_Lager(1,1)~=0
+
+    for aaa=1:Anzahl_der_Kreise(1,1)
+    
+        for bbb=1:Anzahl_der_Lager 
+            
+            if Kreis_Info(aaa,1) == Lager_Info(bbb,1) && Kreis_Info(aaa,2) == Lager_Info(bbb,2)
+                
+                Kreis_Info(aaa,6)=1 
+                
+            end
+            
+        end
+        
+    end
+    
+end
 
 
 % %Berechnung der Bewegungsrichtungen
@@ -1117,65 +1319,206 @@ bez_koerper1=handles.bez_koerper1;
 
 
 % übertragung der bewegung durch seil
+% richtung1=handles.richtung11
 
 anzahl_Seiluebertragung=size(handles.Selected);
 currentCounterValue2 = str2double(get(handles.counter2, 'String'));
 currentCounterValue5 = str2double(get(handles.counter5, 'String'));
+counter5=currentCounterValue5;
 gesammtzahl_koerper=currentCounterValue2+currentCounterValue5
 Remem3=handles.Remem3;
+
+%BEZ 2 fehlt noch
+
+richtung_koerper(bez_koerper1,1)=Koordinate_Info(1,4);
+richtung_koerper(bez_koerper1,2)=1;
+richtung_koerper(bez_koerper1,4)=1;
+
+if bez_koerper2~=110
+    
+    richtung_koerper(bez_koerper2,1)=Koordinate_Info(2,4);
+    
+end
+
+richtung_koerper(bez_koerper2,2)=2;
+richtung_koerper(bez_koerper2,4)=1;
+
+
+richtung_koerper;
+
+for dbfDUFAWJVS=1:5
+
 for zeile=1:anzahl_Seiluebertragung(1,1)
     
     for koerper_nr=1:gesammtzahl_koerper
         
-        if koerper_nr == handles.Selected(zeile,1)
+        if koerper_nr == abs(handles.Selected(zeile,1))
             
             for koerper_nnr=1:gesammtzahl_koerper
                 
-                if koerper_nnr== handles.Selected(zeile,2)
+                if koerper_nnr== abs(handles.Selected(zeile,2))
                     
-                    if bez_koerper1==koerper_nr && bez_koerper2~=koerper_nnr
+                    if richtung_koerper(koerper_nr,4)==1  && richtung_koerper(koerper_nnr,4)~=1
                         x1=handles.Remem3(2*zeile-1,1);
                         x2=handles.Remem3(2*zeile,1);
                         y1=handles.Remem3(2*zeile-1,2);
                         y2=handles.Remem3(2*zeile,2);
-                        richtung_koerper(koerper_nnr,1)=((y2-y1)/(x2-x1));
+                        richtung_koerper(koerper_nnr,1)=atan((y2-y1)/(x2-x1));
+                        
+                        if (x2-x1)==0
+                            
+                            if y2>y1
+                                
+                                richtung_koerper(koerper_nnr,1)=-pi/2;
+                                
+                            else
+                               
+                                richtung_koerper(koerper_nnr,1)=pi/2;
+                                
+                            end
+                            
+                        end
                         richtung_koerper(koerper_nnr,2)=1;
-                        richtung_koerper
-                    elseif bez_koerper2==koerper_nr && bez_koerper1~=koerper_nnr
-                        x1=handles.Remem3(2*zeile-1,1);
-                        x2=handles.Remem3(2*zeile,1);
-                        y1=handles.Remem3(2*zeile-1,2);
-                        y2=handles.Remem3(2*zeile,2);
-                        richtung_koerper(koerper_nnr,1)=((y2-y1)/(x2-x1));
-                        richtung_koerper(koerper_nnr,2)=2;
+                        richtung_koerper(koerper_nnr,3)=drehung1;
+                        richtung_koerper(koerper_nnr,4)=1;
+                        
+                        if currentCounterValue2>=koerper_nnr
+                          %Andere objecte fehlen  
+                            Kreis_Info(koerper_nnr,5)=Kreis_Info(koerper_nr,5);
+                            
+                        elseif koerper_nnr>=currentCounterValue2 % bei weiterne Körpern erweitern
+                            
+                            Rechteck_Info(koerper_nnr,6)=Rechteck_Info(koerper_nr,6);
+                        end
+                        
                         richtung_koerper
                         
-                    elseif bez_koerper1==koerper_nnr && bez_koerper2~=koerper_nr
+                    end
+                        
+                    if richtung_koerper(koerper_nr,4)==1  && richtung_koerper(koerper_nnr,4)~=1
+                        x1=handles.Remem3(2*zeile-1,1);
+                        x2=handles.Remem3(2*zeile,1);
+                        y1=handles.Remem3(2*zeile-1,2);
+                        y2=handles.Remem3(2*zeile,2);
+                        richtung_koerper(koerper_nnr,1)=atan((y2-y1)/(x2-x1));
+                        
+                        if (x2-x1)==0
+                            
+                            if y2>y1
+                                
+                                richtung_koerper(koerper_nnr,1)=-pi/2;
+                                
+                            else
+                               
+                                richtung_koerper(koerper_nnr,1)=pi/2;
+                                
+                            end
+                            
+                        end
+                        
+                        richtung_koerper(koerper_nnr,2)=2;
+                        richtung_koerper(koerper_nnr,3)=drehung2;
+                        richtung_koerper(koerper_nnr,4)=1;
+                         if currentCounterValue2>=koerper_nnr
+                          %Andere objecte fehlen  
+                            Kreis_Info(koerper_nnr,5)=Kreis_Info(koerper_nr,5);
+                            
+                         elseif koerper_nnr>=currentCounterValue2 % bei weiterne Körpern erweitern
+                            
+                           Rechteck_Info(koerper_nnr,6)=Rechteck_Info(koerper_nr,6);
+                           
+                         end
+                        
+                        richtung_koerper
+                        
+                    end
+                        
+                    if richtung_koerper(koerper_nnr,4)==1  && richtung_koerper(koerper_nr,4)~=1
                         
                         x1=handles.Remem3(2*zeile-1,1)
                         x2=handles.Remem3(2*zeile,1)
                         y1=handles.Remem3(2*zeile-1,2)
                         y2=handles.Remem3(2*zeile,2)
-                        richtung_koerper(koerper_nr,1)=((y2-y1)/(x2-x1));
-                        richtung_koerper(koerper_nr,2)=1;
-                        richtung_koerper
-     
-                    elseif bez_koerper2==koerper_nnr && bez_koerper1~=koerper_nr
+                        richtung_koerper(koerper_nr,1)=atan((y2-y1)/(x2-x1));
                         
-                        x1=handles.remem3(2*zeile-1,1)
-                        x2=handles.remem3(2*zeile,1)
-                        y1=handles.remem3(2*zeile-1,2)
-                        y2=handles.remem3(2*zeile,2)
-                        richtung_koerper(koerper_nr,1)=((y2-y1)/(x2-x1));
-                        richtung_koerper(koerper_nr,2)=2;
+                        if (x2-x1)==0
+                            
+                            if y2>y1
+                                
+                                richtung_koerper(koerper_nnr,1)=-pi/2;
+                                
+                            else
+                               
+                                richtung_koerper(koerper_nnr,1)=pi/2;
+                                
+                            end
+                            
+                        end
+                        
+                        richtung_koerper(koerper_nr,2)=1;
+                        richtung_koerper(koerper_nr,3)=drehung1;
+                        richtung_koerper(koerper_nr,4)=1;
+                        
+                        if currentCounterValue2>=koerper_nnr
+                          %Andere objecte fehlen  
+                            Kreis_Info(koerper_nr,5)=Kreis_Info(koerper_nnr,5);
+                            
+                        elseif koerper_nnr>=currentCounterValue2 % bei weiterne Körpern erweitern
+                            
+                           Rechteck_Info(koerper_nr,6)=Rechteck_Info(koerper_nnr,6);
+                         end
+                        
                         richtung_koerper
+                        
                     end
+     
+                    if richtung_koerper(koerper_nnr,4)==1  && richtung_koerper(koerper_nr,4)~=1
+                        
+                        x1=handles.Remem3(2*zeile-1,1)
+                        x2=handles.Remem3(2*zeile,1)
+                        y1=handles.Remem3(2*zeile-1,2)
+                        y2=handles.Remem3(2*zeile,2)
+                        richtung_koerper(koerper_nr,1)=atan((y2-y1)/(x2-x1));
+                        
+                        if (x2-x1)==0
+                            
+                            if y2>y1
+                                
+                                richtung_koerper(koerper_nnr,1)=-pi/2;
+                                
+                            else
+                               
+                                richtung_koerper(koerper_nnr,1)=pi/2;
+                                
+                            end
+                            
+                        end
+                       
+                        richtung_koerper(koerper_nr,2)=2;
+                        richtung_koerper(koerper_nr,3)=drehung2;
+                        richtung_koerper(koerper_nr,4)=1; 
+                        if currentCounterValue2>=koerper_nnr
+                          %Andere objecte fehlen  
+                            Kreis_Info(koerper_nr,5)=Kreis_Info(koerper_nnr,5);
+                            
+                        elseif koerper_nnr>=currentCounterValue2 % bei weiterne Körpern erweitern
+                            
+                           Rechteck_Info(koerper_nr,6)=Rechteck_Info(koerper_nnr,6);
+                            
+                         end
+                        
+                        richtung_koerper
+                        
+                    end
+                    
+                   
                 end
             end
         end
     end
 end
 
+end
 
 
 %Rechnung
@@ -1186,9 +1529,9 @@ if t2==0&&t3==0&&t4==0
         z0=[z1;z2];
         ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;t13/t1];
         [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)])
-        figure(1);
-        subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
-        subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+%         figure(1);
+%         subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+%         subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
         [nnvc]=0;%Neue Vektoren für flüssigere Animation
         [nnve]=0;
         nna=size(t);
@@ -1207,10 +1550,10 @@ if t2==0&&t3==0&&t4==0
           
             for hnnvbc=1:nnaa(1,2)-1
             vc(2*hnnvbc)=(nnvc(hnnvbc+1)+nnvc(hnnvbc))/2; %Erzeugung von mehr Koordinaten
-            vc(2*hnnvbc-1)=nnvc(hnnvbc);
+            vc(2*hnnvbc-1)=nnvc(hnnvbc)
             ve(2*hnnvbc)=(nnve(hnnvbc+1)+nnve(hnnvbc))/2; %Anpassung der Zeit
             ve(2*hnnvbc-1)=nnve(hnnvbc);
-            ve;
+            ve
     
             end
          
@@ -1219,11 +1562,11 @@ if t2==0&&t3==0&&t4==0
             vnnaa=size(ve);
           
             for hnnvbcc=1:vnnaa(1,2)-1
-            vvc(2*hnnvbcc)=(vc(hnnvbcc+1)+vc(hnnvbcc))/2; %Erzeugung von mehr Koordinaten
-            vvc(2*hnnvbcc-1)=vc(hnnvbcc);
+            vvc(2*hnnvbcc,1)=(vc(hnnvbcc+1)+vc(hnnvbcc))/2; %Erzeugung von mehr Koordinaten
+            vvc(2*hnnvbcc-1,1)=vc(hnnvbcc);
             vve(2*hnnvbcc)=(ve(hnnvbcc+1)+ve(hnnvbcc))/2; %Anpassung der Zeit
             vve(2*hnnvbcc-1)=ve(hnnvbcc);
-            vve;
+            vve
             vnnaa=size(vvc);
     
             end
@@ -1242,9 +1585,12 @@ else
         subplot(2,2,4); plot(t,z(:,4));grid on; title('position'); xlabel('t'); ylabel('z-pos');
 end
 
+
+
 %Neu positionierung der Objekte 
 counter2=str2double(get(handles.counter2, 'String'));
 object1=handles.object1;
+%object2=handles.object2;
 % object2=handles.object2;
 % object3=handles.object3;
 % object4=handles.object4;
@@ -1252,7 +1598,7 @@ bez_koerper1=handles.bez_koerper1;
 drehung1=handles.drehung1;
 abroll1=handles.abroll1;
 a=handles.a;
-nnvtt=0:0.1:2*pi;
+nnvtt=0:0.2:2*pi;
 easy1=size(abroll1);
 rotation_rollen1=handles.rotation_rollen1;
 for jenny1=2:easy1(1,1)
@@ -1261,132 +1607,651 @@ for jenny1=2:easy1(1,1)
         rotation_rollen1=1;
     end
 end
-        
-    
-    rn1=handles.rn1;%Auslesen der Geometrie
-                     xn1=handles.xn1;
-                     yn1=handles.yn1;
-    richtung1=handles.richtung11
-    cos_richtung1=cos(richtung1);
-    sin_richtung1=sin(richtung1);
- for nnvt=160:vnnaa(1,2)-1
-%Neu positionieren der einzelnen Objekte
- for nz=1:counter2 %Überprüfen ob 1 oder0!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     
-     if nz==1 %Objekt 1
-            %axes(handles.kosy);
-           % hold off;
-%               xlim([0 a+a/10+1]);% Korrektur des Limits
-%               ylim([0 a+a/10+1]); 
-                if object1==1 %Auslesen ob es sich um ein Kreis handelt.
-%                      rn1=handles.rn1;%Auslesen der Geometrie
-%                      xn1=handles.xn1;
-%                      yn1=handles.yn1;
-     
 
-                 
-                 
-                if bez_koerper1==1 %Auslesen welche generalisierte Koordinate
-                                   %die Position bestimmt. 
-                                %hhh=size(z(:,:)) ;  
-                                %richtung1=handles.richtung11; %Auslesen der Bewegungsrichtung
-                     if drehung1==0 %Auslesen ob es sich um Rotation oder Translation handelt. Muss noch definiert werden
-%                          abroll1=handles.abroll1;
-% %                          easy=size(abroll1);
-% %                          for jenny=2:easy(1,1)
-% %                                 anna=abroll1(jenny,1);
-% %                          
-                         if rotation_rollen1==1;
-                            %cla(handles.kosy);
-                            %hold(handles.kosy,'on'); %nnvtt=0:0.01:2*pi;
-                            %for nnvt=1:vnnaa(1,2)-1
-                                %axes(handles.kosy);
-                                phi=round(-(vvc(nnvt))/rn1,4);
-%                                 cos_richtung1=cos(richtung1);
-%                                 sin_richtung1=sin(richtung1);
-                               
-                                spec=[rn1*sin(0:0.2:pi) 0.5*rn1*sin(0:0.2:pi) 0.5*rn1*sin(pi:0.2:2*pi);rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi);...
-                                      rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(0:0.2:pi);rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(0:0.2:pi)];
+rotation_rollen2=0;
+abroll2= handles.abroll2;        
+ easy2=size(abroll2);
+%rotation_rollen2=handles.rotation_rollen2;
+for jenny2=2:easy2(1,1)
+    anna2=abroll2(jenny2,1);
+    if anna2==0
+        rotation_rollen2=1;
+    end
+end
+abroll3= handles.abroll3; 
+rotation_rollen3=0;
+easy3=size(abroll3);
+%rotation_rollen3=handles.rotation_rollen3;
+for jenny3=2:easy3(1,1)
+    anna3=abroll3(jenny3,1);
+    if anna3==0
+        rotation_rollen3=1;
+    end
+end
+
+%%% Berechnung der Ausgangspunkte der Körper
+
+
+
+rotation_rollen=[rotation_rollen1 ; rotation_rollen2 ; rotation_rollen3];
+x1=handles.generalisierte_KOordinate_X1;
+y1=handles.generalisierte_KOordinate_Y1;
+%object=[object1;object2;object3;object4;object5;object6];
+
+
+%Einlagern der Ausgangspunkte der gen. Koordinate x1;y1
+% for asdf=1:counter2+%counter5
+%     
+%     if asdf==1
+%     
+%         if richtung_koerper(asdf,2)==1
+%         
+%             if drehung1==0
+%             
+%                 if object(asdf)== 1 %  Kreis
+%             
+%                     xn1kreis=handles.xn1kreis;
+%                     yn1kreis=handles.yn1kreis;
+%                     rn1kreis=handles.rn1kreis;
+%                     steigung_general=tan(richtung1);
+%                     steigung_orth=tan(richtung1+pi/2);
+%                     b_para=yn1kreis-steigung_general*xn1kreis;
+%                     b_ortho=y1-steigung_orth*x1;
+%         
+%                             % solv fkt
+%        
+%                             if steigung_general~=0 && steigung_general~=pi/2 && steigung_general~=pi && steigung_general~=3*pi/2 && steigung_general~=2*pi
+%                     
+%                                 syms symsx symsy
+%                     
+%                                 start_generalisiertekoordinatex1=solve(steigung_general*symsx+b_para == steigung_orth*symsx+b_ortho)
+%                                 start_generalisiertekoordinatey1=steigung_general*start_generalisiertekoordinatex1+b_para;
+%                                 handles.start_generalisiertekoordinatex1=start_generalisiertekoordinatex1;
+%                                 handles.start_generalisiertekoordinatey1=start_generalisiertekoordinatey1;
+%                                 guidata(hObject, handles);
+%                     
+%                             elseif steigung_general==0 
+%                     
+%                                 handles.start_generalisiertekoordinatex1=x1;
+%                                 handles.start_generalisiertekoordinatey1=yn1kreis;
+%                                 guidata(hObject, handles);
+%                     
+%                             end
+%                 
+%                 elseif object(asdf)==0 %Rechteck
+% 
+%                     xn1reckteck=handles.xn1;
+%                     yn1rechteck=handles.yn1;
+%                     steigung_general=tan(richtung1);
+%                     steigung_orth=tan(richtung1+pi/2);
+%                     b_para=yn1rechteck-steigung_general*xn1reckteck;
+%                     b_ortho=y1-steigung_orth*x1;
+%                             % solv fkt
+%        
+%                             if steigung_general~=0 && steigung_general~=pi/2 && steigung_general~=pi && steigung_general~=3*pi/2 && steigung_general~=2*pi
+%                     
+%                                 syms symsx symsy
+%                     
+%                                 start_generalisiertekoordinatex1=solve(steigung_general*symsx+b_para == steigung_orth*symsx+b_ortho)
+%                                 start_generalisiertekoordinatey1=steigung_general*start_generalisiertekoordinatex1+b_para;
+%                                 handles.start_generalisiertekoordinatex1=start_generalisiertekoordinatex1;
+%                                 handles.start_generalisiertekoordinatey1=start_generalisiertekoordinatey1;
+%                                 guidata(hObject, handles);
+%                     
+%                             elseif steigung_general==0 
+%                     
+%                                 handles.start_generalisiertekoordinatex1=x1;
+%                                 handles.start_generalisiertekoordinatey1=yn1kreis;
+%                                 guidata(hObject, handles);
+%                             end
+%                 
+%                 end
+%             
+%         elseif
+% 
+%         end
+%         
+%     elseif richtung_koerper(asdf,2)==2
+% 
+%         if drehung1==1
+%             
+%             if object(asdf)== 1% noch in Matrix schreiben %  Kreis
+%             
+%                 xn1kreis=handles.xn1kreis;
+%                 yn1kreis=handles.yn1kreis;
+%                 rn1kreis=handles.rn1kreis;
+%                 steigung_general=tan(richtung2);
+%                 steigung_orth=tan(richtung2+pi/2);
+%                 b_para=yn1kreis-steigung_general*xn1kreis;
+%                 b_ortho=y1-steigung_orth*x1;
+%         
+%                 % solv fkt
+%        
+%                 if steigung_general~=0 && steigung_general~=pi/2 && steigung_general~=pi && steigung_general~=3*pi/2 && steigung_general~=2*pi
+%                     
+%                     syms symsx symsy
+%                     
+%                     start_generalisiertekoordinatex1=solve(steigung_general*symsx+b_para == steigung_orth*symsx+b_ortho)
+%                     start_generalisiertekoordinatey1=steigung_general*start_generalisiertekoordinatex1+b_para;
+%                     handles.start_generalisiertekoordinatex1=start_generalisiertekoordinatex1;
+%                     handles.start_generalisiertekoordinatey1=start_generalisiertekoordinatey1;
+%                     guidata(hObject, handles);
+%                     
+%                 elseif steigung_general==0 
+%                     
+%                     handles.start_generalisiertekoordinatex1=x1;
+%                     handles.start_generalisiertekoordinatey1=yn1kreis;
+%                     guidata(hObject, handles);
+%                     
+%                 end
+%                 
+%             elseif object(asdf)==0 %Rechteck
+% 
+%                 xn1reckteck=handles.xn1;
+%                 yn1rechteck=handles.yn1;
+%                 steigung_general=tan(richtung1);
+%                 steigung_orth=tan(richtung1+pi/2);
+%                 b_para=yn1rechteck-steigung_general*xn1reckteck;
+%                 b_ortho=y1-steigung_orth*x1;
+%                 % solv fkt
+%        
+%                 if steigung_general~=0 && steigung_general~=pi/2 && steigung_general~=pi && steigung_general~=3*pi/2 && steigung_general~=2*pi
+%                     
+%                     syms symsx symsy
+%                     
+%                     start_generalisiertekoordinatex1=solve(steigung_general*symsx+b_para == steigung_orth*symsx+b_ortho)
+%                     start_generalisiertekoordinatey1=steigung_general*start_generalisiertekoordinatex1+b_para;
+%                     handles.start_generalisiertekoordinatex1=start_generalisiertekoordinatex1;
+%                     handles.start_generalisiertekoordinatey1=start_generalisiertekoordinatey1;
+%                     guidata(hObject, handles);
+%                     
+%                 elseif steigung_general==0 
+%                     
+%                     handles.start_generalisiertekoordinatex1=x1;
+%                     handles.start_generalisiertekoordinatey1=yn1kreis;
+%                     guidata(hObject, handles);
+%                 end
+%                 
+%             end
+%             
+%         elseif
+% 
+%         end
+
+    rn1=handles.rn1;%Auslesen der Geometrie
+    xn1=handles.xn1;
+    yn1=handles.yn1;
+%      rn2=handles.rn2;%Auslesen der Geometrie
+%      xn2=handles.xn2;
+%      yn2=handles.yn2;
+%      start_generalisiertekoordinatex2=xn2;
+%      start_generalisiertekoordinatey2=yn2;
+%     richtung1=handles.richtung11
+    
+    cos_richtung1=cos(richtung_koerper(1,1));
+    sin_richtung1=sin(richtung_koerper(1,1));
+%      cos_richtung2=cos(richtung_koerper(2,1));
+%      sin_richtung2=sin(richtung_koerper(2,1));
+handles.POS_Koerper_t0;
+% for nnvt=1:vnnaa(1,2)-1
+%  
+%   POS_Koerper_t0  
+% %Neu positionieren der einzelnen Objekte
+% 
+%  for nz=1:counter2+counter5 %Überprüfen ob 1 oder0!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%      
+%      if nz==1 %Objekt 1
+%             %axes(handles.kosy);
+%             % hold off;
+% %           xlim([0 a+a/10+1]);% Korrektur des Limits
+% %           ylim([0 a+a/10+1]); 
+%                 if nz<=counter2 %Auslesen ob es sich um ein Kreis handelt.   Ersetzen durch: 
+% %                      rn1=handles.rn1;%Auslesen der Geometrie
+% %                      xn1=handles.xn1;
+% %                      yn1=handles.yn1;
+% 
+%                     if Kreis_Info(nz,5)==1 %Auslesen welche generalisierte Koordinate in diesem Fall muss es 1 sein
+%                         
+%                                 %die Position bestimmt. 
+%                                 %hhh=size(z(:,:)) ;  
+%                                 %richtung1=handles.richtung11; %Auslesen der Bewegungsrichtung
+%                                 
+%                         if drehung1==0 %Auslesen ob es sich um Rotation oder Translation handelt. 
+%                           
+%                             if Kreis_Info(nz,4)==0;
+%                              
+%                                 %cla(handles.kosy);
+%                                 %hold(handles.kosy,'on'); %nnvtt=0:0.01:2*pi;
+%                                 %for nnvt=1:vnnaa(1,2)-1
+%                                 %axes(handles.kosy);
+%                                 
+%                                 phi=round(-(vvc(nnvt))/rn1,4);
+% %                               cos_richtung1=cos(richtung1);
+% %                               sin_richtung1=sin(richtung1);
+%                                
+%                                 spec=[rn1*sin(0:0.2:pi) 0.5*rn1*sin(0:0.2:pi) 0.5*rn1*sin(pi:0.2:2*pi);rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi);...
+%                                       rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(0:0.2:pi);rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(0:0.2:pi)];
+%                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+%                                 spec1 = (spec'*trans)'; 
+%                                 
+%                                 [x]=[POS_Koerper_t0(1,2)-vvc(160)*cos_richtung1+vvc(nnvt)*cos_richtung1+spec1(1,:);POS_Koerper_t0(1,2)-vvc(160)*cos_richtung1+vvc(nnvt)*cos_richtung1+spec1(3,:)];
+%                                 [y]=[POS_Koerper_t0(1,3)-vvc(160)*sin_richtung1+vvc(nnvt)*sin_richtung1+spec1(2,:);POS_Koerper_t0(1,3)-vvc(160)*sin_richtung1+vvc(nnvt)*sin_richtung1+spec1(4,:)];
+%                                 h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+%                                 hold on;
+%                                 h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+%                                 h(3) = 0;  
+%                                 xlim([0 a+a/10+1]);% Korrektur des Limits
+%                                 ylim([0 a+a/10+1]);
+%                            
+%                                 %h=fill(nnvxx,nnvyy,'b','Parent',handles.kosy);
+%                           
+%                                 %pause(vve(nnvt+1)-vve(nnvt));
+%                                 %set(gca,'xtick',[]); 
+%                                 %set(gca,'ytick',[]);
+%                                 %set(gca, 'Visible', 'off');
+%                          else
+%                              
+%                              %axes(handles.kosy);
+%                                 phi=0;
+% %                                 cos_richtung1=cos(richtung1);
+% %                                 sin_richtung1=sin(richtung1);
+%                                
+%                                 spec=[rn1*sin(0:0.2:pi) 0.5*rn1*sin(0:0.2:pi) 0.5*rn1*sin(pi:0.2:2*pi);rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi);...
+%                                       rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(0:0.2:pi);rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(0:0.2:pi)];
+%                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+%                                 spec1 = (spec'*trans)'; 
+%                                
+%                                 %rdjdut=vvc(nnvt)*cos_richtung1
+%                                 [x]=[start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(1,:);start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(3,:)];
+%                                 [y]=[start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(2,:);start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(4,:)];
+%                                 h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+%                                 hold on;
+%                                 h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+%                                 h(3) = 0;  
+%                                 xlim([0 a+a/10+1]);% Korrektur des Limits
+%                                 ylim([0 a+a/10+1]);
+%                            
+%                               
+%                          end
+%                          
+%                      else  
+%                          
+%                          if rot_um_fest1==0
+%   
+%                          end
+%                          
+%                          
+%                          end
+%                          end
+%    
+%                 end
+%                     
+%                      
+%      elseif nz==2 %Objekt 1
+%             %axes(handles.kosy);
+%            % hold off;
+% %               xlim([0 a+a/10+1]);% Korrektur des Limits
+% %               ylim([0 a+a/10+1]); 
+%                 if object2==1 %Auslesen ob es sich um ein Kreis handelt.
+% %                      rn1=handles.rn1;%Auslesen der Geometrie
+% %                      xn1=handles.xn1;
+% %                      yn1=handles.yn1;
+%      
+          
+%                 if richtung_koerper(2,2)==1 %Auslesen welche generalisierte Koordinate
+%                                    %die Position bestimmt. 
+%                                 %hhh=size(z(:,:)) ;  
+%                                 %richtung1=handles.richtung11; %Auslesen der Bewegungsrichtung
+%                      if drehung2==0 %Auslesen ob es sich um Rotation oder Translation handelt. 
+%                           
+%                          if rotation_rollen(nz,1)==1;
+%                             %cla(handles.kosy);
+%                             %hold(handles.kosy,'on'); %nnvtt=0:0.01:2*pi;
+%                             %for nnvt=1:vnnaa(1,2)-1
+%                                 %axes(handles.kosy);
+%                                 phi=round(-(vvc(nnvt))/rn2,4);
+% %                                 cos_richtung1=cos(richtung1);
+% %                                 sin_richtung1=sin(richtung1);
+%                                
+%                                 spec=[rn2*sin(0:0.2:pi) 0.5*rn2*sin(0:0.2:pi) 0.5*rn2*sin(pi:0.2:2*pi);rn2*cos(0:0.2:pi) -0.5*rn2+0.5*rn2*cos(pi:0.2:2*pi) 0.5*rn2+0.5*rn2*cos(pi:0.2:2*pi);...
+%                                       rn2*sin(pi:0.2:2*pi) 0.5*rn2*sin(pi:0.2:2*pi) 0.5*rn2*sin(0:0.2:pi);rn2*cos(pi:0.2:2*pi) 0.5*rn2+0.5*rn2*cos(0:0.2:pi) -0.5*rn2+0.5*rn2*cos(0:0.2:pi)];
+%                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+%                                 spec1 = (spec'*trans)'; 
+%                                 
+%                                 [x]=[POS_Koerper_t0(2,1)-vvc(160)*cos_richtung1+vvc(nnvt)*cos_richtung2+spec1(1,:);POS_Koerper_t0(2,1)-vvc(160)*cos_richtung1+vvc(nnvt)*cos_richtung2+spec1(3,:)];
+%                                 [y]=[POS_Koerper_t0(2,2)-vvc(160)*sin_richtung1+vvc(nnvt)*sin_richtung2+spec1(2,:);POS_Koerper_t0(2,2)-vvc(160)*sin_richtung1+vvc(nnvt)*sin_richtung2+spec1(4,:)];
+%                                 g(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+%                                 hold on;
+%                                 g(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+%                                 g(3) = 0;  
+%                                 xlim([0 a+a/10+1]);% Korrektur des Limits
+%                                 ylim([0 a+a/10+1]);
+%                                 %h=fill(nnvxx,nnvyy,'b','Parent',handles.kosy);                        
+%                                 %pause(vve(nnvt+1)-vve(nnvt));
+%                                 %set(gca,'xtick',[]); 
+%                                 %set(gca,'ytick',[]);
+%                                 %set(gca, 'Visible', 'off');
+%                          else
+%                              
+%                              %axes(handles.kosy);
+%                                 phi=0;
+% %                                 cos_richtung1=cos(richtung1);
+% %                                 sin_richtung1=sin(richtung1);
+%                                
+%                                 spec=[rn2*sin(0:0.2:pi) 0.5*rn2*sin(0:0.2:pi) 0.5*rn2*sin(pi:0.2:2*pi);rn2*cos(0:0.2:pi) -0.5*rn2+0.5*rn2*cos(pi:0.2:2*pi) 0.5*rn2+0.5*rn2*cos(pi:0.2:2*pi);...
+%                                       rn2*sin(pi:0.2:2*pi) 0.5*rn2*sin(pi:0.2:2*pi) 0.5*rn2*sin(0:0.2:pi);rn2*cos(pi:0.2:2*pi) 0.5*rn2+0.5*rn2*cos(0:0.2:pi) -0.5*rn2+0.5*rn2*cos(0:0.2:pi)];
+%                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+%                                 spec1 = (spec'*trans)'; 
+%                                
+%                                 %rdjdut=vvc(nnvt)*cos_richtung1
+%                                 [x]=[start_generalisiertekoordinatex2+vvc(nnvt)*cos_richtung2+spec1(1,:)-vvc(160)*cos_richtung2;start_generalisiertekoordinatex2+vvc(nnvt)*cos_richtung2+spec1(3,:)-vvc(160)*cos_richtung2];
+%                                 [y]=[start_generalisiertekoordinatey2+vvc(nnvt)*sin_richtung2+spec1(2,:)-vvc(160)*sin_richtung2;start_generalisiertekoordinatey2+vvc(nnvt)*sin_richtung2+spec1(4,:)-vvc(160)*sin_richtung2];
+%                                 g(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+%                                 hold on;
+%                                 g(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+%                                 g(3) = 0;  
+%                                 xlim([0 a+a/10+1]);% Korrektur des Limits
+%                                 ylim([0 a+a/10+1]);
+ 
+%                          end
+%                          
+%                      else  
+%                          
+%                          if rot_um_fest1==0
+%   
+%                          end
+%                          
+%                          end
+%                          end
+%                         
+%                      end
+%      end
+%      
+%  end
+                    
+%          pause(vve(nnvt+1)-vve(nnvt));
+%                                     if nnvt ~= vnnaa(1,2)-1
+%                                           delete(h);
+%                                           delete(g);
+%                                      end
+% end
+
+for nz=1:counter2+counter5
+    
+cos_richtung(nz,1)=cos(richtung_koerper(nz,1));
+sin_richtung(nz,1)=sin(richtung_koerper(nz,1));
+
+end
+
+for nz=1:counter2
+    
+    if Kreis_Info(nz,5)==1
+    
+        if Kreis_Info(nz,6)==1
+        
+            x_b=Kreis_Info(nz,1)
+            
+        end
+        
+    end
+    
+end
+
+for nz=1:counter2
+    
+    if Kreis_Info(nz,5)==1
+    
+        if Kreis_Info(bez_koerper1,1)<x_b && Kreis_Info(nz,1)>x_b 
+    
+            Kreis_Info(nz,7)=1;
+    
+        end
+
+        if Kreis_Info(bez_koerper1,1)>x_b && Kreis_Info(nz,1)<x_b 
+    
+            Kreis_Info(nz,7)=1;
+            
+        end
+        
+    end
+    
+end
+
+% neu Positonieren der Elemente
+
+for nnvt=160:vnnaa(1,1)-1
+    
+     if nnvt ~= vnnaa(1,2)-1
+         
+        
+        
+            delete(h);
+                                        
+     end
+    
+    %Kreise neu Positionieren
+    
+    for nz=1:counter2
+        
+        %AUf welche generalisierte Koordinate wird bezug genommen
+        
+        if Kreis_Info(nz,5)==1 %generalisierte Koordinate 1
+            
+            % Handelt es sich heirbei um eine Translation oder Rotation
+            
+            if Koordinate_Info(1,3)==1 % in diesem Fall Translation
+                
+                %Rollen oder Gleiten
+                
+                %Überprüfen ob es der Bezugspörper ist
+                
+                if Kreis_Info(nz,7)==1 || Kreis_Info(nz,6)==1
+                    
+                    if Kreis_Info(nz,4)==0 % in dem Fall rollen                
+                    
+                        phi=round(-(vvc(nnvt,1))/Kreis_Info(nz,3),4);
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
                                 spec1 = (spec'*trans)'; 
                                 
-                                [x]=[start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(1,:);start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(3,:)];
-                                [y]=[start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(2,:);start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(4,:)];
-                                h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                [x]=[Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:);Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:)];
+                                [y]=[Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:);Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:)];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
                                 hold on;
-                                h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
-                                h(3) = 0;  
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
                                 xlim([0 a+a/10+1]);% Korrektur des Limits
                                 ylim([0 a+a/10+1]);
-                           
-                                %h=fill(nnvxx,nnvyy,'b','Parent',handles.kosy);
-                          
-                                %pause(vve(nnvt+1)-vve(nnvt));
-                                %set(gca,'xtick',[]); 
-                                %set(gca,'ytick',[]);
-                                %set(gca, 'Visible', 'off');
-                         else
-                             
-                             axes(handles.kosy);
-                                phi=0;
-%                                 cos_richtung1=cos(richtung1);
-%                                 sin_richtung1=sin(richtung1);
-                               
-                                spec=[rn1*sin(0:0.2:pi) 0.5*rn1*sin(0:0.2:pi) 0.5*rn1*sin(pi:0.2:2*pi);rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(pi:0.2:2*pi);...
-                                      rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(pi:0.2:2*pi) 0.5*rn1*sin(0:0.2:pi);rn1*cos(pi:0.2:2*pi) 0.5*rn1+0.5*rn1*cos(0:0.2:pi) -0.5*rn1+0.5*rn1*cos(0:0.2:pi)];
+                                
+                    elseif Kreis_Info(nz,4)==1 % in dem Fall gleiten
+                    
+                        phi=0;
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
                                 trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
                                 spec1 = (spec'*trans)'; 
-                               
-                                rdjdut=vvc(nnvt)*cos_richtung1
-                                [x]=[start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(1,:);start_generalisiertekoordinatex1+vvc(nnvt)*cos_richtung1+spec1(3,:)];
-                                [y]=[start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(2,:);start_generalisiertekoordinatey1+vvc(nnvt)*sin_richtung1+spec1(4,:)];
-                                h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                
+                                [x]=[Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:);Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:)];
+                                [y]=[Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:);Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:)];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
                                 hold on;
-                                h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
-                                h(3) = 0;  
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
                                 xlim([0 a+a/10+1]);% Korrektur des Limits
                                 ylim([0 a+a/10+1]);
-                           
-                             
-                             
-                             
-                             
-                            end
-                         end
-                         end
-                        
-                     else
-                         
-                         
-                     end
+                                
+                    elseif  Kreis_Info(nz,4)==2 && Kreis_Info(nz,6)==0% in dem Fall gleiten
+                    
+                        phi=0;
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
+                                trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+                                spec1 = (spec'*trans)'; 
+                                
+                                [x]=[Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:);Kreis_Info(nz,1)-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:)];
+                                [y]=[Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:);Kreis_Info(nz,2)-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:)];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                hold on;
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
+                                xlim([0 a+a/10+1]);% Korrektur des Limits
+                                ylim([0 a+a/10+1]);              
+                                
+                    elseif Kreis_Info(nz,6)==1 % in dem Fall Rotation um ein Lager inder Mitte des Kreises
                      
+                        if Kreis_Info(bez_koerper1,2)> Kreis_Info(nz,2)
+                            
+                            phi=round(-(vvc(nnvt,1))/Kreis_Info(nz,3),4);
+                            
+                        else
+                            
+                            phi=round((vvc(nnvt,1))/Kreis_Info(nz,3),4);
+                            
+                        end
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
+                                trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+                                spec1 = (spec'*trans)'; 
+                                
+                                [x]=[Kreis_Info(nz,1)+spec1(1,:);Kreis_Info(nz,1)+spec1(3,:)];
+                                [y]=[Kreis_Info(nz,2)+spec1(2,:);Kreis_Info(nz,2)+spec1(4,:)];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                hold on;
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
+                                xlim([0 a+a/10+1]);% Korrektur des Limits
+                                ylim([0 a+a/10+1]);
+                                
+                                end
+                                
+                else
+                        
+                            if Kreis_Info(nz,4)==0 % in dem Fall rollen                
+                    
+                                phi=round((vvc(nnvt,1))/Kreis_Info(nz,3),4);
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
+                                trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+                                spec1 = (spec'*trans)'; 
+                                
+                                [x]=[Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:));Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:))];
+                                [y]=[Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:));Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:))];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                hold on;
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
+                                xlim([0 a+a/10+1]);% Korrektur des Limits
+                                ylim([0 a+a/10+1]);
+                                
+                    elseif Kreis_Info(nz,4)==1 % in dem Fall gleiten
+                    
+                                phi=0;
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
+                                trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+                                spec1 = (spec'*trans)'; 
+                                
+                                [x]=[Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:));Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:))];
+                                [y]=[Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:));Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:))];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                hold on;
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
+                                xlim([0 a+a/10+1]);% Korrektur des Limits
+                                ylim([0 a+a/10+1]);
+                                
+                    elseif  Kreis_Info(nz,4)==2 && Kreis_Info(nz,6)==0% in dem Fall gleiten
+                    
+                                phi=0;
+                    
+                                spec=[Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi);Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(pi:0.2:2*pi);...
+                                      Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)*sin(0:0.2:pi);Kreis_Info(nz,3)*cos(pi:0.2:2*pi) 0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi) -0.5*Kreis_Info(nz,3)+0.5*Kreis_Info(nz,3)*cos(0:0.2:pi)];
+                                trans = [cos(phi) sin(phi) 0 0;-sin(phi) cos(phi) 0 0;0 0 cos(phi) sin(phi);0 0 -sin(phi) cos(phi)];
+                                spec1 = (spec'*trans)'; 
+                                
+                                [x]=[Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(1,:));Kreis_Info(nz,1)-(-vvc(160,1)*cos_richtung(nz,1)+vvc(nnvt,1)*cos_richtung(nz,1)+spec1(3,:))];
+                                [y]=[Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(2,:));Kreis_Info(nz,2)-(-vvc(160,1)*sin_richtung(nz,1)+vvc(nnvt,1)*sin_richtung(nz,1)+spec1(4,:))];
+                                h(nz,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+                                hold on;
+                                h(nz,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+                                h(nz,3) = 0;  
+                                xlim([0 a+a/10+1]);% Korrektur des Limits
+                                ylim([0 a+a/10+1]);   
+                                
+                            end
+                                
+                                 
                 end
-                end
-%      elseif nz==2
-%              axes(handles.kosy);
-%              hold off;
-%              xlim([0 a+a/10+1]);% Korrektur des Limits
-%              ylim([0 a+a/10+1]); 
-%               if object2==1 %Auslesen ob es sich um ein Kreis handelt.
-%                      rn2=handles.rn2;%Auslesen der Geometrie
-%                      xn2=handles.xn2;
-%                      yn2=handles.yn2;   
-%                      
-%                         if bez_koerper1==1  %Auslesen welche generalisierte Koordinate
-%                                             %die Position bestimmt. 
-%                                 hhh=size(z(:,:)) ;  
-%                                 richtung1=handles.richtung11; %Auslesen der Bewegungsrichtung
+                
+            end
+            
+        end
+        
+    end
+    
+    %Rechteckbewegung
+    
+    for nz=1:counter5
+        
+        %AUf welche generalisierte Koordinate wird bezug genommen
+        
+        if Rechteck_Info(nz,6)==1 %generalisierte Koordinate 1
+            
+            % Handelt es sich heirbei um eine Translation oder Rotation
+            
+            if Koordinate_Info(1,3)==1 % in diesem Fall Translation
+                
+                    x=[xn1-cos(w1)*ln1/2-cos(pi/2-w1)*bn1/2 xn1-cos(w1)*ln1/2+cos(pi/2-w1)*bn1/2  xn1+cos(w1)*ln1/2+cos(pi/2-w1)*bn1/2 xn1+cos(w1)*ln1/2-cos(pi/2-w1)*bn1/2 ];
+                    y=[yn1-sin(w1)*ln1/2+sin(pi/2-w1)*bn1/2 yn1-sin(w1)*ln1/2-sin(pi/2-w1)*bn1/2 yn1+sin(w1)*ln1/2-sin(pi/2-w1)*bn1/2 yn1+sin(w1)*ln1/2+sin(pi/2-w1)*bn1/2];
+                    fill(x,y,'b');
+                    xlim([0 a+a/10+1]);% Korrektur des Limits
+                    ylim([0 a+a/10+1]);
+                
+            end
+            
+        end
+        
+         if nnvt ~= vnnaa(1,2)-1
+        
+            delete(h);
+                                        
+     end
+    end
+    
+    %Pausenfunktion
+    
+    pause(vve(nnvt+1)-vve(nnvt));
+    
+%         if nnvt ~= vnnaa(1,2)-1
+%         
+%             delete(h);
+%                                         
+%         end
+    
+end
 
 
 
 
-                                     
-         pause(vve(nnvt+1)-vve(nnvt));
-                                    if nnvt ~= vnnaa(1,2)-1
-                                          delete(h);
-                                     end
- end
 
+
+
+
+
+
+figure(1);
+        subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+        subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+        [nnvc]=0;%Neue Vektoren für flüssigere Animation
+        [nnve]=0;
+        nna=size(t);
     
 
          
@@ -1418,13 +2283,6 @@ newString_koerper = sprintf('%d', int32(currentCounterValue2 +1));
 
 % Send the new string to the text control.
 set(handles.counter_koerperzahl, 'String', newString_koerper );
-currentCounterValue2 = str2double(get(handles.counter2, 'String'));
-switch currentCounterValue2
-    case 1 , set(handles.x_k,'String','2'),set(handles.y_k,'String','2'),set(handles.r_k,'String','0.5')
-    case 2 , set(handles.x_k,'String','6'),set(handles.y_k,'String','11')
-    case 3 , set(handles.x_k,'String','12'),set(handles.y_k,'String','5')
-end
-
 
 
 
@@ -1519,18 +2377,18 @@ function k_ok_Callback(hObject, eventdata, handles)
 % hObject    handle to k_ok (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% Kreiserzeug funktion
-%output:xn1kreis,yn1kreis,rn1kreis,KreisPosi,KreisRadius,rn1,xn1,yn1,object1
 
 counter2=str2double(get(handles.counter2,'string'));
 guidata(hObject, handles);
-currentCounterValue = str2double(get(handles.counter, 'String'));
+currentCounterValue = str2double(get(handles.counter, 'String'))
 a=handles.a;
 X=handles.X;
 m=handles.m;
 b=handles.b;
+h=handles.h;
+Kreis_Info=handles.Kreis_Info;
 if counter2==1; 
-    object1=1; %kosy enthaelt einen Kreis
+    object1=1; %kosy enthält einen Kreis
     xn1=str2double(get(handles.x_k,'string'));% Auslesen der Eingaben
     %w1=str2double(get(handles.w,'string'))/360*2*pi;
     yn1=str2double(get(handles.y_k,'string'));
@@ -1547,16 +2405,20 @@ if counter2==1;
     spec1 = (spec'*trans)';
     [x]=[xn1+spec1(1,:);xn1+spec1(3,:)];
     [y]=[yn1+spec1(2,:);yn1+spec1(4,:)];
-    h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+    h(1,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
     hold on;
-    h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
-    h(3) = 0;  %Erzeug Kreis
+    h(1,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+    h(1,3) = 0;  
     xlim([0 a+a/10+1]);% Korrektur des Limits
     ylim([0 a+a/10+1]);
-    m=handles.m;%fehlt;
+    m=handles.m
     b=handles.bv;
     handles.KreisPosi=[ xn1 yn1];
     handles.KreisRadius = [rn1];
+    x_kreiss = xn1;
+    y_kreiss = yn1;
+    Kreis_Info(1,:)=[xn1 , yn1 , rn1 , 2 , 0 , 0];
+    handles.Kreis_Info=Kreis_Info;
     
 %     set(gca,'ytick',[]);
 %     set(gca, 'Visible', 'off');
@@ -1565,12 +2427,14 @@ if counter2==1;
     handles.xn1=xn1;
     handles.yn1=yn1;
     handles.object1=object1;
+    handles.h=h;
     guidata(hObject, handles);
     %Abrollbedingung
     [o1]=0; %Vektor gibt an an welchen Oberflächen Kreisscheibe 1 Kontakt hat.
     tol=0.0001*a;
     n=1;
-    %currentCounterValue;%fehlt;
+    set(handles.panel_kreis,'Visible','off');
+    currentCounterValue
     for g=1:currentCounterValue
               
         if( X(n)<=xn1 && xn1<=X(n+1)) || (X(n)==X(n+1) && X(n)>=xn1-tol-rn1 && X(n)<=xn1+tol+rn1)
@@ -1585,7 +2449,7 @@ if counter2==1;
                     nv=X(4*g-3);
                     
                     if (xn1-rn1-tol)<=nv && nv<=(xn1+rn1+tol) && u==0
-                    [o1]=[o1;g];%fehlt;
+                    [o1]=[o1;g]
                         u=1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
@@ -1597,7 +2461,7 @@ if counter2==1;
                     abs=sqrt((xn1-e)^2+(yn1-navy)^2);
                 
                     if (rn1-tol)<=abs && abs<=(rn1+tol) && u==0
-                        [o1]=[o1;g];%fehlt;
+                        [o1]=[o1;g]
                         u=1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
@@ -1608,6 +2472,7 @@ if counter2==1;
         end
         end 
     end
+   
           
     elseif counter2==2
     object2=1; %kosy enthält einen Kreis
@@ -1625,16 +2490,18 @@ if counter2==1;
     spec2 = (spec'*trans)';
     [x]=[xn2+spec2(1,:);xn2+spec2(3,:)];
     [y]=[yn2+spec2(2,:);yn2+spec2(4,:)];
-    h(1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+    h(2,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
     hold on;
-    h(2) = fill(x(2,:),y(2,:),'w','Parent',gca);
-    h(3) = 0;  
+    h(2,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+    h(2,3) = 0;  
     xlim([0 a+a/10+1]);% Korrektur des Limits
     ylim([0 a+a/10+1]);
     m=handles.m
     b=handles.bv;
     handles.KreisPosi=[ handles.KreisPosi ; xn2 yn2];
     handles.KreisRadius = [handles.KreisRadius ; rn2];
+    Kreis_Info(2,:)=[xn2 , yn2 , rn2 , 2 , 0 , 0];
+    handles.Kreis_Info=Kreis_Info;
     
 %     set(gca,'ytick',[]);
 %     set(gca, 'Visible', 'off');
@@ -1643,11 +2510,16 @@ if counter2==1;
     handles.xn2=xn2;
     handles.yn2=yn2;
     handles.object2=object2;
+    x_kreiss = xn2;
+    y_kreiss = yn2;
+    handles.h=h;
+    guidata(hObject, handles);
     
      %Abrollbedingung
     [o2]=0; %Vektor gibt an an welchen Oberflächen Kreisscheibe 1 Kontakt hat.
     tol=0.0001*a;
     n=1;
+    set(handles.panel_kreis,'Visible','off');
     currentCounterValue
     for g=1:currentCounterValue
               
@@ -1668,6 +2540,7 @@ if counter2==1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
                         uiwait() 
+                        guidata(hObject,handles);
                     end
                 else   
                     
@@ -1679,10 +2552,8 @@ if counter2==1;
                         u=1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
-                        handles.nimabia = 12345;
-                        guidata(handles.rollen,handles);
-                        uiwait() 
-                        handles = guidata(handles.figure1);
+                        uiwait()
+                        handles=guidata(hObject);
                     end
             end
         end
@@ -1697,9 +2568,17 @@ elseif counter2==3
     rn3=str2double(get(handles.r_k,'string'));
     axes(handles.kosy);
     t=0:0.01:2*pi;% Zeichnen des Kreises
-    [x]=sin(t)*rn3+xn3;
-    [y]=cos(t)*rn3+yn3;
-    fill(x,y,'b');
+    phi3=0;
+    spec=[rn3*sin(0:0.01:pi) 0.5*rn3*sin(0:0.01:pi) 0.5*rn3*sin(pi:0.01:2*pi);rn3*cos(0:0.01:pi) -0.5*rn3+0.5*rn3*cos(pi:0.01:2*pi) 0.5*rn3+0.5*rn3*cos(pi:0.01:2*pi);...
+    rn3*sin(pi:0.01:2*pi) 0.5*rn3*sin(pi:0.01:2*pi) 0.5*rn3*sin(0:0.01:pi);rn3*cos(pi:0.01:2*pi) 0.5*rn3+0.5*rn3*cos(0:0.01:pi) -0.5*rn3+0.5*rn3*cos(0:0.01:pi)];
+    trans = [cos(phi3) sin(phi3) 0 0;-sin(phi3) cos(phi3) 0 0;0 0 cos(phi3) sin(phi3);0 0 -sin(phi3) cos(phi3)];
+    spec3 = (spec'*trans)';
+    [x]=[xn3+spec3(1,:);xn3+spec3(3,:)];
+    [y]=[yn3+spec3(2,:);yn3+spec3(4,:)];
+    h(3,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+    hold on;
+    h(3,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+    h(3,3) = 0;  
     xlim([0 a+a/10+1]);% Korrektur des Limits
     ylim([0 a+a/10+1]);
     m=handles.m;
@@ -1713,15 +2592,24 @@ elseif counter2==3
     handles.xn3=xn3;
     handles.yn3=yn3;
     handles.object3=object3;
+    x_kreiss = xn3;
+    y_kreiss = yn3;
+    Kreis_Info(3,:)=[xn3 , yn3 , rn3 , 2 , 0 , 0];
+    handles.Kreis_Info=Kreis_Info;
+    handles.h=h;
+    guidata(hObject, handles);
     
     %Abrollbedingung
     [o3]=0; %Vektor gibt an an welchen Oberflächen Kreisscheibe 1 Kontakt hat.
     tol=0.0001*a;
     n=1;
+    set(handles.panel_kreis,'Visible','off');
     currentCounterValue
     for g=1:currentCounterValue
               
-        if( X(n)<=xn3 && xn3<=X(n+1)) || (X(n)==X(n+1) && X(n)>=xn3-tol-rn3 && X(n)<=xn3+tol+rn3)
+            
+              
+        if( X(n)<=xn3 && xn3<=X(n+1)) || (X(n)==X(n+1) && X(n)>=xn3-tol-rn1 && X(n)<=xn3+tol+rn3)
             
             n=n+4;
             u=0;
@@ -1749,7 +2637,8 @@ elseif counter2==3
                         u=1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
-                        uiwait() 
+                        uiwait()
+                       handles = guidata(hObject);
                     end
             end
         end
@@ -1763,9 +2652,17 @@ elseif counter2==4
     rn4=str2double(get(handles.r_k,'string'));
     axes(handles.kosy);
     t=0:0.01:2*pi;% Zeichnen des Kreises
-    [x]=sin(t)*rn4+xn4;
-    [y]=cos(t)*rn4+yn4;
-    fill(x,y,'b');
+    phi4=0;
+    spec=[rn4*sin(0:0.01:pi) 0.5*rn4*sin(0:0.01:pi) 0.5*rn4*sin(pi:0.01:2*pi);rn4*cos(0:0.01:pi) -0.5*rn4+0.5*rn4*cos(pi:0.01:2*pi) 0.5*rn4+0.5*rn4*cos(pi:0.01:2*pi);...
+    rn4*sin(pi:0.01:2*pi) 0.5*rn4*sin(pi:0.01:2*pi) 0.5*rn4*sin(0:0.01:pi);rn4*cos(pi:0.01:2*pi) 0.5*rn4+0.5*rn4*cos(0:0.01:pi) -0.5*rn4+0.5*rn4*cos(0:0.01:pi)];
+    trans = [cos(phi4) sin(phi4) 0 0;-sin(phi4) cos(phi4) 0 0;0 0 cos(phi4) sin(phi4);0 0 -sin(phi4) cos(phi4)];
+    spec4 = (spec'*trans)';
+    [x]=[xn4+spec4(1,:);xn4+spec4(3,:)];
+    [y]=[yn4+spec4(2,:);yn4+spec4(4,:)];
+    h(4,1) = fill(x(1,:),y(1,:),'k','Parent',gca);
+    hold on;
+    h(4,2) = fill(x(2,:),y(2,:),'w','Parent',gca);
+    h(4,3) = 0;  
     xlim([0 a+a/10+1]);% Korrektur des Limits
     ylim([0 a+a/10+1]);
     m=handles.m;
@@ -1779,13 +2676,21 @@ elseif counter2==4
     handles.xn4=xn4;
     handles.yn4=yn4;
     handles.object4=object4;
-    
+    x_kreiss = xn4;
+    y_kreiss = yn4;
+    Kreis_Info(4,:)=[xn4 , yn4 , rn4 , 2 , 0 , 0];
+    handles.Kreis_Info=Kreis_Info;
     %Abrollbedingung
     [o4]=0; %Vektor gibt an an welchen Oberflächen Kreisscheibe 1 Kontakt hat.
     tol=0.0001*a;
     n=1;
+    handles.h=h;
+    guidata(hObject, handles);
+    set(handles.panel_kreis,'Visible','off');
     currentCounterValue
     for g=1:currentCounterValue
+              
+          
               
         if( X(n)<=xn4 && xn4<=X(n+1)) || (X(n)==X(n+1) && X(n)>=xn4-tol-rn4 && X(n)<=xn4+tol+rn4)
             
@@ -1815,15 +2720,47 @@ elseif counter2==4
                         u=1;
                         set(handles.abrollbedingung,'Visible','on');
                         set(handles.oberflaechenbedingung, 'String', g);
-                        uiwait() 
+                        uiwait()
+                       handles = guidata(hObject);
                     end
             end
         end
         end 
     end
-end
 set(handles.panel_kreis,'Visible','off');
 guidata(hObject, handles);
+counter5=str2double(get(handles.counter5,'string'));
+%%% MAtrix der Positionen zu t=0
+ges_counter=counter2+counter5
+POS_Koerper_t0=handles.POS_Koerper_t0;
+end
+
+% for nn_r_Koerper=1:10
+%     
+%     if nn_r_Koerper==ges_counter
+%         
+%         POS_Koerper_t0(nn_r_Koerper,:)=[1 x_kreiss y_kreiss];
+%         
+%     end
+%     
+%     
+%     
+% end
+
+%handles.POS_Koerper_t0=POS_Koerper_t0;
+
+guidata(hObject, handles);
+
+
+
+
+
+
+
+
+
+
+
 
 
 % --- Executes on button press in rollen.
@@ -1834,7 +2771,7 @@ function rollen_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of rollen
 %liest aus ob kreis rollt
-guidata(handles.figure1, handles);
+guidata(hObject, handles);
 counter2=str2double(get(handles.counter2,'string'));
 here=handles.here;
 % if counter2==1 && here==0
@@ -1850,10 +2787,13 @@ abroll1=handles.abroll1;
 abroll2=handles.abroll2;
 abroll3=handles.abroll3;
 abroll4=handles.abroll4;
+Kreis_Info=handles.Kreis_Info;
 if counter2==1
    
     [abroll1]=[abroll1;0]
     handles.abroll1=abroll1; 
+     Kreis_Info(1,4)= [0];
+    handles.Kreis_Info=Kreis_Info;
     guidata(hObject, handles);
     set(handles.abrollbedingung,'Visible','off');
    
@@ -1863,14 +2803,18 @@ elseif counter2==2
     %abroll2=handles.abroll2;
     [abroll2]=[abroll2;0]
     handles.abroll2=abroll2;
+     Kreis_Info(2,4)= [0];
+    handles.Kreis_Info=Kreis_Info;
     set(handles.abrollbedingung,'Visible','off');
-    guidata(handles.figure1, handles);
+    guidata(hObject, handles);
     uiresume();
     
 elseif counter2==3
     abroll3=handles.abroll3;
     [abroll3]=[abroll3;0]
     handles.abroll3=abroll3;
+    Kreis_Info(3,4)= [0];
+    handles.Kreis_Info=Kreis_Info;
     set(handles.abrollbedingung,'Visible','off');
     guidata(hObject, handles);
     uiresume();
@@ -1879,6 +2823,8 @@ elseif counter2==4
     abroll4=handles.abroll4;
     [abroll4]=[abroll4;0]
     handles.abroll4=abroll4;
+    Kreis_Info(4,4)= [0];
+    handles.Kreis_Info=Kreis_Info;
     set(handles.abrollbedingung,'Visible','off');
     guidata(hObject, handles);
     uiresume();
@@ -1906,11 +2852,14 @@ abroll1=handles.abroll1;
 abroll2=handles.abroll2;
 abroll3=handles.abroll3;
 abroll4=handles.abroll4;
+Kreis_Info=handles.Kreis_Info;
 if counter2==1
     
-    [abroll1]=[abroll1;1];%fehlt;
+    [abroll1]=[abroll1;1]
     handles.abroll1=abroll1;
     set(handles.abrollbedingung,'Visible','off');
+    Kreis_Info(1,4)= [1];
+    handles.Kreis_Info=Kreis_Info;
     guidata(hObject, handles);
     uiresume();
     
@@ -1919,6 +2868,8 @@ elseif counter2==2
     [abroll2]=[abroll2;1]
     handles.abroll2=abroll2;
     set(handles.abrollbedingung,'Visible','off');
+    Kreis_Info(2,4)= [1];
+    handles.Kreis_Info=Kreis_Info;
     guidata(hObject, handles);
     uiresume();
     
@@ -1927,6 +2878,8 @@ elseif counter2==3
     [abroll3]=[abroll3;1]
     handles.abroll3=abroll3;
     set(handles.abrollbedingung,'Visible','off');
+    Kreis_Info(3,4)= 1;
+    handles.Kreis_Info=Kreis_Info;
     guidata(hObject, handles);
     uiresume();
     
@@ -1935,9 +2888,24 @@ elseif counter2==4
     [abroll4]=[abroll4;1]
     handles.abroll4=abroll4;
     set(handles.abrollbedingung,'Visible','off');
+    Kreis_Info(4,4)= 1;
+    handles.Kreis_Info=Kreis_Info;
     guidata(hObject, handles);
     uiresume();
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2783,9 +3751,6 @@ newString = sprintf('%d', int32(currentCounterValue +1));
 % Send the new string to the text control.
 set(handles.counter4, 'String', newString );
 data = str2double(get(handles.punkte, 'data'));
-set(handles.fest_x,'String','7');
-set(handles.fest_y,'String','1');
-set(handles.fest_winkel,'String','0');
 
 
 
@@ -2846,11 +3811,14 @@ a=handles.a;
 axes(handles.kosy);
 r=(a+a/10+1)/125;
 
+Lager_Info=handles.Lager_Info;
 if cCV==1
     x_pos1=str2double(get(handles.fest_x,'string'));
     y_pos1=str2double(get(handles.fest_y,'string'));
     w1=str2double(get(handles.fest_winkel,'string'))/360*2*pi;
     handles.LagerPos=[x_pos1 y_pos1];
+    Lager_Info(1,:)=[ x_pos1 , y_pos1 , w1 , 1 ];
+    handles.Lager_Info=Lager_Info;
     guidata(hObject,handles);
 
     % draw the FL
@@ -2871,8 +3839,10 @@ if cCV==1
 elseif cCV==2
     x_pos2=str2double(get(handles.fest_x,'string'));
     y_pos2=str2double(get(handles.fest_y,'string'));
-    w2=str2double(get(handles.fest_winkel,'string'));
+    w2=str2double(get(handles.fest_winkel,'string'))/360*2*pi;
     handles.LagerPos=[handles.LagerPos ; x_pos2 y_pos2];
+    Lager_Info(2,:)=[ x_pos2 , y_pos2 , w2 , 1 ];
+    handles.Lager_Info=Lager_Info;
     guidata(hObject,handles);
 
     % draw the FL
@@ -2893,8 +3863,10 @@ elseif cCV==2
 elseif cCV==3
     x_pos3=str2double(get(handles.fest_x,'string'));
     y_pos3=str2double(get(handles.fest_y,'string'));
-    w3=str2double(get(handles.fest_winkel,'string'));
+    w3=str2double(get(handles.fest_winkel,'string'))/360*2*pi;
     handles.LagerPos=[handles.LagerPos ; x_pos3 y_pos3];
+    Lager_Info(3,:)=[ x_pos3 , y_pos3 , w3 , 1 ];
+    handles.Lager_Info=Lager_Info;
     guidata(hObject,handles);
 
     % draw the FL
@@ -2912,22 +3884,25 @@ elseif cCV==3
     % Ende des FL
      set(handles.auflager_fest,'Visible','off');
      
-     elseif cCV==2
-    x_pos2=str2double(get(handles.fest_x,'string'));
-    y_pos2=str2double(get(handles.fest_y,'string'));
-    w2=str2double(get(handles.fest_winkel,'string'));
-    handles.LagerPos=[handles.LagerPos ; x_pos2 y_pos2];
+     elseif cCV==4
+    x_pos4=str2double(get(handles.fest_x,'string'));
+    y_pos4=str2double(get(handles.fest_y,'string'));
+    w4=str2double(get(handles.fest_winkel,'string'))/360*2*pi;
+    handles.LagerPos=[handles.LagerPos ; x_pos4 y_pos4];
+    handles.LagerPos=[handles.LagerPos ; x_pos4 y_pos4];
+    Lager_Info(4,:)=[ x_pos4 , y_pos4 , w4 , 1 ];
+    handles.Lager_Info=Lager_Info;
     guidata(hObject,handles);
 
     % draw the FL
 
     phi=0:0.1:2*pi;
-    plot(x_pos2+r*sin(w2)+r*cos(phi),y_pos2-r*cos(w2)+r*sin(phi),'b'); hold on;   % Beginn des FL
-    plot([x_pos2+2*r*sin(w2),x_pos2+4*r*sin(w2)-2*r*cos(w2)],[y_pos2-2*r*cos(w2),y_pos2-4*r*cos(w2)-2*r*sin(w2)],'b'); hold on;
-    plot([x_pos2+2*r*cos(w2)+4*r*sin(w2),x_pos2+2*r*sin(w2)],[y_pos2-4*r*cos(w2)+2*r*sin(w2),y_pos2-2*r*cos(w2)],'b'); hold on;
-    plot([x_pos2-3*r*cos(w2)+4*r*sin(w2),x_pos2+3*r*cos(w2)+4*r*sin(w2)],[y_pos2-4*r*cos(w2)-3*r*sin(w2),y_pos2-4*r*cos(w2)+3*r*sin(w2)],'b'); hold on;
+    plot(x_pos4+r*sin(w4)+r*cos(phi),y_pos4-r*cos(w4)+r*sin(phi),'b'); hold on;   % Beginn des FL
+    plot([x_pos4+2*r*sin(w4),x_pos4+4*r*sin(w4)-2*r*cos(w4)],[y_pos4-2*r*cos(w4),y_pos4-4*r*cos(w4)-2*r*sin(w4)],'b'); hold on;
+    plot([x_pos4+2*r*cos(w4)+4*r*sin(w4),x_pos4+2*r*sin(w4)],[y_pos4-4*r*cos(w4)+2*r*sin(w4),y_pos4-2*r*cos(w4)],'b'); hold on;
+    plot([x_pos4-3*r*cos(w4)+4*r*sin(w4),x_pos4+3*r*cos(w4)+4*r*sin(w4)],[y_pos4-4*r*cos(w4)-3*r*sin(w4),y_pos4-4*r*cos(w4)+3*r*sin(w4)],'b'); hold on;
         for i=0:2
-            plot([x_pos3-1.5*r*cos(w3)+4*r*sin(w3)+2*r*cos(w3)*i,x_pos3-2.5*r*cos(w3)+2*r*cos(w3)*i+5*r*sin(w3)],[y_pos3-4*r*cos(w3)-1.5*r*sin(w3)+2*r*sin(w3)*i,y_pos3-5*r*cos(w3)-2.5*r*sin(w3)+2*r*sin(w3)*i],'b'); hold on;
+            plot([x_pos4-1.5*r*cos(w4)+4*r*sin(w4)+2*r*cos(w4)*i,x_pos4-2.5*r*cos(w4)+2*r*cos(w4)*i+5*r*sin(w4)],[y_pos4-4*r*cos(w4)-1.5*r*sin(w4)+2*r*sin(w4)*i,y_pos4-5*r*cos(w4)-2.5*r*sin(w4)+2*r*sin(w4)*i],'b'); hold on;
         end
     xlim([0 a+a/10+1]);% Korrektur des Limits
     ylim([0 a+a/10+1]);
@@ -2967,10 +3942,9 @@ handles.Counter = 0;
 handles.dete=[];
 handles.Remem=[];
 handles.SelectTemp = [];
-handles.Iter = 0;
-handles.SelectType = [0 0];
-handles.SelectKreis = [0 0];
-handles.Counter_Point = 0;
+handles.Iter=0;
+handles.SelectType=[0 0];
+handles.SelectKreis=[0 0];
 set(handles.figure1,'WindowButtonMotionFcn',@drawCircle);
 set(handles.figure1,'WindowButtonDownFcn',@drawCircle);
 set(handles.figure1, 'selectionType','open');
@@ -3202,13 +4176,11 @@ function drawCircle(hObject,eventdata)
 %0;dete=[];Kreis_Info[x,y,r,ko,];Lager_Info[];RechteckPosi;Iter
 %output:dete;nukber(Template);figSeil2;figSeil3;Remem;SelectType;SelectKreis;Remem3;SelectTemp
 %Counter for mouse, Iter for points;
-%handles.Counter_Point = 0;
 handles = guidata(hObject);
 handles.FederIsOn = 2;
 m_type = get(hObject, 'selectionType');
 if strcmp(m_type, 'normal')
-    handles.Counter = handles.Counter+1;%+handles.Iter
-    handles.Counter_Point = handles.Counter_Point + handles.Iter;
+    handles.Counter = handles.Counter+1+handles.Iter;%+handles.Iter
     handles.SelectType(1) = handles.SelectType(2);
     handles.SelectType(2) = 0;
     handles.SelectKreis(1) = handles.SelectKreis(2);
@@ -3233,7 +4205,7 @@ if strcmp(m_type, 'normal')
         handles.figSeil3 = [];
         handles.Iter = 0;
         %handles.RememTemp = 0;
-        Temp = handles.SelectTemp;
+        %handles.SelectTemp = 0;
         
     elseif handles.Counter >= 2
         if handles.SelectType(1) == 0 %exit
@@ -3278,13 +4250,13 @@ if ~handles.Counter
         if norm(pos - handles.KreisPosi(i,:))> handles.KreisRadius(i)
             if handles.nukber == dim(1) - 1
                 handles.dete(handles.Counter+1) = plot(pos(1),pos(2),'bo');
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [pos(1) pos(2)];
+                handles.RememTemp(handles.Counter+1,:) = [pos(1) pos(2)];
                 handles.SelectTemp(handles.Counter+1,1) = 0;
             end
             handles.nukber = handles.nukber + 1;
         elseif norm(pos - handles.KreisPosi(i,:))< handles.KreisRadius(i)*1
             handles.dete(handles.Counter+1) = plot(handles.KreisPosi(i,1) , handles.KreisPosi(i,2),'bo');
-            handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [handles.KreisPosi(i,1) handles.KreisPosi(i,2)];
+            handles.RememTemp(handles.Counter+1,:) = [handles.KreisPosi(i,1) handles.KreisPosi(i,2)];
             handles.SelectTemp(1,1) = i;
             handles.SelectKreis1 = i;
         end
@@ -3296,25 +4268,23 @@ elseif handles.Counter == 1
         delete(handles.figSeil2);
         handles.figSeil2 = [];
     end
-    if handles.Iter
-        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [];
-        handles.SelectTemp(handles.Counter+1,:) = [];
-        handles.Iter = 0;
-    end
     handles.SelectType(2) = 0;%init
     handles.SelectKreis(2) = 0;%init
     dim = size(handles.KreisPosi);
     handles.nukber = 0;
     for i=1:dim(1)
-        
-        
+        if handles.Iter
+        handles.RememTemp(handles.Counter+1,:) = [];
+        handles.SelectTemp(handles.Counter+1,:) = [];
+        end
+        handles.Iter = 0;
         if norm(pos - handles.KreisPosi(i,:))> handles.KreisRadius(i)
             if handles.nukber == dim(1) - 1
 %                 handles.figSeil2(1) = plot([pos(1) handles.RememTemp(1,1)],[pos(2) handles.RememTemp(1,2)],'b');
                 handles.figSeil2(1) = drawSpring(pos(1),pos(2),handles.RememTemp(1,1)...
                     ,handles.RememTemp(1,2),handles,0,handles.FederIsOn,handles.kosy);
                 handles.figSeil2(2) = plot(pos(1),pos(2),'bo');
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [pos(1),pos(2)];
+                handles.RememTemp(handles.Counter+1,:) = [pos(1),pos(2)];
                 handles.SelectTemp(1,2) = 0;
             end
             handles.nukber = handles.nukber + 1;
@@ -3338,12 +4308,12 @@ elseif handles.Counter == 1
                         handles.figSeil2(2) = drawSpring(handles.RememTemp(1,1)...
                         ,handles.RememTemp(1,2),punkt(1,1),punkt(1,2),handles,0,2,handles.kosy);
                 end
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(1,1),punkt(1,2)];
+                handles.RememTemp(handles.Counter+1,:) = [punkt(1,1),punkt(1,2)];
                 handles.SelectTemp(1,2) = -i;
                 handles.SelectTemp(2,1) = -i;
                 handles.SelectType(2) = 2;
                 handles.SelectKreis(2) = i;
-                handles.Iter = 1;
+                %handles.Iter = 1;
             else
                 handles.figSeil2(1) = plot(punkt(2,1),punkt(2,2),'bo');
 %                 handles.figSeil2(2) = plot([punkt(2,1) handles.RememTemp(1,1)],[punkt(2,2) handles.RememTemp(1,2)],'b');
@@ -3354,12 +4324,12 @@ elseif handles.Counter == 1
                     handles.figSeil2(2) = drawSpring(handles.RememTemp(1,1)...
                     ,handles.RememTemp(1,2),punkt(2,1),punkt(2,2),handles,0,2,handles.kosy);
                 end
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(2,1),punkt(2,2)];
+                handles.RememTemp(handles.Counter+1,:) = [punkt(2,1),punkt(2,2)];
                 handles.SelectTemp(1,2) = -i;
                 handles.SelectTemp(2,1) = -i;
                 handles.SelectType(2) = 1;
                 handles.SelectKreis(2) = i;
-                handles.Iter = 1;
+                %handles.Iter = 1;
             end
 
         elseif (norm(pos - handles.KreisPosi(i,:)) < handles.KreisRadius(i)*0.618) && i~=handles.SelectKreis1
@@ -3367,7 +4337,7 @@ elseif handles.Counter == 1
 %             handles.figSeil2(2) = plot([handles.KreisPosi(i,1) handles.RememTemp(1,1)],[handles.KreisPosi(i,2) handles.RememTemp(1,2)],'b');
             handles.figSeil2(2) = drawSpring(handles.KreisPosi(i,1),handles.KreisPosi(i,2),handles.RememTemp(1,1)...
                     ,handles.RememTemp(1,2),handles,0,handles.FederIsOn,handles.kosy);
-            handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
+            handles.RememTemp(handles.Counter+1,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
             handles.SelectTemp(1,2) = i; %SelectKreis
         end
     end
@@ -3379,8 +4349,8 @@ elseif handles.Counter >= 2
         handles.figSeil3 = [];
     end
     if handles.Iter
-        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [];
-        handles.SelectTemp(handles.Counter,:) = [];
+        handles.RememTemp(handles.Counter+1,:) = [];
+        handles.SelectTemp(handles.Counter+1,:) = [];
     end
     handles.Iter = 0;
 %     if handles.SelectType && handles.SelectKreis && norm(pos - handles.KreisPosi(handles.SelectKreis,:))> handles.KreisRadius(handles.SelectKreis)
@@ -3400,7 +4370,7 @@ elseif handles.Counter >= 2
 %             pos(1),pos(2),handles,0,2,handles.kosy);%%%
 %         handles.figSeil3(3) = plot(punkt(handles.SelectType,1),punkt(handles.SelectType,2),'bo');
 %         handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType,1) punkt(handles.SelectType,2)];
-%         handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [pos(1) pos(2)];
+%         handles.RememTemp(handles.Counter+2,:) = [pos(1) pos(2)];
 %         handles.SelectTemp(2,2) = 0;
     dim = size(handles.KreisPosi);
     handles.nukber = 0;
@@ -3420,8 +4390,8 @@ elseif handles.Counter >= 2
                     handles.figSeil3(1) = plot(pos(1),pos(2),'bo');
                     [handles.figSeil3(2)] = drawSpring(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),pos(1),pos(2),handles,0,handles.FederIsOn,handles.kosy);%%%
                     handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                    handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                    handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [pos(1),pos(2)];%&/
+                    handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                    handles.RememTemp(handles.Counter+2,:) = [pos(1),pos(2)];%&/
                     handles.SelectTemp(handles.Counter,2) = 0;%&/
                     handles.SelectType(2) = 0;
                 end
@@ -3456,10 +4426,10 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(3,1),punkt(3,2),'bo');
                         handles.figSeil3(2) = plot([punkt(3,1) punkt(handles.SelectType(1),1)],[punkt(3,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
-                        handles.SelectTemp(handles.Counter-1,2) = -i;%&/
-                        handles.SelectTemp(handles.Counter,1) = -i;
+                        handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+2,:) = [punkt(3,1),punkt(3,2)];%&/
+                        handles.SelectTemp(handles.Counter,2) = -i;%&/
+                        handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
                     else
                         alpha = acos((+r+handles.KreisRadius(handles.SelectKreis(1)))/norm(vec));
@@ -3472,10 +4442,10 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(3,1),punkt(3,2),'bo');
                         handles.figSeil3(2) = plot([punkt(3,1) punkt(handles.SelectType(1),1)],[punkt(3,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
-                        handles.SelectTemp(handles.Counter-1,2) = -i;%&/
-                        handles.SelectTemp(handles.Counter,1) = -i;
+                        handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+2,:) = [punkt(3,1),punkt(3,2)];%&/
+                        handles.SelectTemp(handles.Counter,2) = -i;%&/
+                        handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
                     end
 
@@ -3493,10 +4463,10 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(4,1),punkt(4,2),'bo');
                         handles.figSeil3(2) = plot([punkt(4,1) punkt(handles.SelectType(1),1)],[punkt(4,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
-                        handles.SelectTemp(handles.Counter-1,2) = -i;%&/
-                        handles.SelectTemp(handles.Counter,1) = -i;
+                        handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+2,:) = [punkt(4,1),punkt(4,2)];%&/
+                        handles.SelectTemp(handles.Counter,2) = -i;%&/
+                        handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
                     else
                         alpha = acos((+r+handles.KreisRadius(handles.SelectKreis(1)))/norm(vec));
@@ -3509,10 +4479,10 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(4,1),punkt(4,2),'bo');
                         handles.figSeil3(2) = plot([punkt(4,1) punkt(handles.SelectType(1),1)],[punkt(4,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
-                        handles.SelectTemp(handles.Counter-1,2) = -i;%&/
-                        handles.SelectTemp(handles.Counter,1) = -i;
+                        handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+2,:) = [punkt(4,1),punkt(4,2)];%&/
+                        handles.SelectTemp(handles.Counter,2) = -i;%&/
+                        handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
                     end
 
@@ -3527,10 +4497,11 @@ elseif handles.Counter >= 2
                 alpha = acos(r/norm(vec));
                 punkt(1,:) = handles.KreisPosi(handles.SelectKreis(1),:)+[r*cos(alpha) r*sin(alpha)]*[cos(beta) -sin(beta) ;-sin(beta) -cos(beta) ];
                 punkt(2,:) = handles.KreisPosi(handles.SelectKreis(1),:)+[r*cos(alpha) r*sin(alpha)]*[cos(beta) -sin(beta) ;sin(beta) cos(beta) ];
+                type = handles.SelectType
                 handles.figSeil3(1) = plot(handles.KreisPosi(i,1) , handles.KreisPosi(i,2),'bo');
                 handles.figSeil3(2) = plot([handles.KreisPosi(i,1) punkt(handles.SelectType(1),1)],[handles.KreisPosi(i,2) punkt(handles.SelectType(1),2)],'b');
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1) , punkt(handles.SelectType(1),2)];
-                handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
+                handles.RememTemp(handles.Counter+1,:) = [punkt(handles.SelectType(1),1) , punkt(handles.SelectType(1),2)];
+                handles.RememTemp(handles.Counter+2,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
                 handles.SelectTemp(handles.Counter,2) = i;
                 handles.SelectType(2) = 0;
             end
@@ -3539,15 +4510,15 @@ elseif handles.Counter >= 2
 end
 dimLager = size(handles.LagerPos);
 for i = 1:dimLager(1)
-    if norm(pos - handles.LagerPos(i,:))<1 
+    if norm(pos - handles.LagerPos(i,:))<0.2 
 
         delete(handles.dete);
         handles.dete(handles.Counter+1) = plot(handles.LagerPos(i,1),handles.LagerPos(i,2),'bo');
-        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = handles.LagerPos(i,:);
+        handles.RememTemp(handles.Counter+1,:) = handles.LagerPos(i,:);
         if handles.Counter == 1
             delete(handles.figSeil2);
             handles.figSeil2 = plot([handles.LagerPos(i,1) handles.RememTemp(1,1)],[handles.LagerPos(i,2) handles.RememTemp(1,2)],'b');
-            handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = handles.LagerPos(i,:);
+            handles.RememTemp(handles.Counter+1,:) = handles.LagerPos(i,:);
             handles.SelectTemp(handles.Counter,2) = 0;
         elseif handles.Counter >= 2 && handles.SelectType(1)
             if ~isempty(handles.figSeil3)
@@ -3568,8 +4539,8 @@ for i = 1:dimLager(1)
             handles.figSeil3(2) = drawSpring(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),handles.LagerPos(i,1),handles.LagerPos(i,2),handles,0,handles.FederIsOn, handles.kosy);
             handles.figSeil3(1) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
             handles.SelectType(2) = 0;
-            handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = handles.LagerPos(i,:);
-            handles.SelectTemp(handles.Counter-1,2) = 0;
+            handles.RememTemp(handles.Counter+2,:) = handles.LagerPos(i,:);
+            handles.SelectTemp(handles.Counter,2) = 0;
         end
 
     end
@@ -3577,7 +4548,6 @@ end
 % RememTemp = handles.RememTemp
 % SelectedTemp = handles.SelectTemp
 guidata(hObject,handles);
-
 
 % --- Executes on button press in loslager.
 function loslager_Callback(hObject, eventdata, handles)
@@ -3704,3 +4674,7 @@ elseif item == 1
 elseif item == 2
     h=plot(gca,[x0 x],[y0 y],'b-');
 end
+
+
+
+
