@@ -34,7 +34,7 @@ if strcmp(m_type, 'normal')
         handles.figSeil3 = [];
         handles.Iter = 0;
         %handles.RememTemp = 0;
-        Temp = handles.SelectTemp;
+        Temp = handles.SelectTemp;%#OK
         
     elseif handles.Counter >= 2
         if handles.SelectType(1) == 0 %exit
@@ -66,7 +66,7 @@ end
 pos = get(handles.kosy, 'currentpoint'); %%%
 pos = [pos(1,1) pos(1,2)];
 if handles.Counter >= 2
-    jsh = handles.SelectTemp
+    jsh = handles.RememTemp
 end
     
 
@@ -225,8 +225,8 @@ elseif handles.Counter >= 2
                     handles.figSeil3(1) = plot(pos(1),pos(2),'bo');
                     [handles.figSeil3(2)] = drawSpring(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),pos(1),pos(2),handles,0,handles.FederIsOn,handles.kosy);%%%
                     handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                    handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                    handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [pos(1),pos(2)];%&/
+                    handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                    handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [pos(1),pos(2)];%&/
                     handles.SelectTemp(handles.Counter,2) = 0;%&/
                     handles.SelectType(2) = 0;
                 end
@@ -261,8 +261,8 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(3,1),punkt(3,2),'bo');
                         handles.figSeil3(2) = plot([punkt(3,1) punkt(handles.SelectType(1),1)],[punkt(3,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
+                        handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
                         handles.SelectTemp(handles.Counter,2) = -i;%&/
                         handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
@@ -277,8 +277,8 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(3,1),punkt(3,2),'bo');
                         handles.figSeil3(2) = plot([punkt(3,1) punkt(handles.SelectType(1),1)],[punkt(3,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
+                        handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(3,1),punkt(3,2)];%&/
                         handles.SelectTemp(handles.Counter,2) = -i;%&/
                         handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
@@ -298,8 +298,8 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(4,1),punkt(4,2),'bo');
                         handles.figSeil3(2) = plot([punkt(4,1) punkt(handles.SelectType(1),1)],[punkt(4,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
+                        handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
                         handles.SelectTemp(handles.Counter,2) = -i;%&/
                         handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
@@ -314,8 +314,8 @@ elseif handles.Counter >= 2
                         handles.figSeil3(1) = plot(punkt(4,1),punkt(4,2),'bo');
                         handles.figSeil3(2) = plot([punkt(4,1) punkt(handles.SelectType(1),1)],[punkt(4,2) punkt(handles.SelectType(1),2)],'b');
                         handles.figSeil3(3) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
-                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
-                        handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
+                        handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2)];
+                        handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(4,1),punkt(4,2)];%&/
                         handles.SelectTemp(handles.Counter,2) = -i;%&/
                         handles.SelectTemp(handles.Counter+1,1) = -i;
                         handles.Iter = 1;
@@ -334,8 +334,8 @@ elseif handles.Counter >= 2
                 punkt(2,:) = handles.KreisPosi(handles.SelectKreis(1),:)+[r*cos(alpha) r*sin(alpha)]*[cos(beta) -sin(beta) ;sin(beta) cos(beta) ];
                 handles.figSeil3(1) = plot(handles.KreisPosi(i,1) , handles.KreisPosi(i,2),'bo');
                 handles.figSeil3(2) = plot([handles.KreisPosi(i,1) punkt(handles.SelectType(1),1)],[handles.KreisPosi(i,2) punkt(handles.SelectType(1),2)],'b');
-                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1) , punkt(handles.SelectType(1),2)];
-                handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
+                handles.RememTemp(handles.Counter+handles.Counter_Point,:) = [punkt(handles.SelectType(1),1) , punkt(handles.SelectType(1),2)];
+                handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = [handles.KreisPosi(i,1) , handles.KreisPosi(i,2)];
                 handles.SelectTemp(handles.Counter,2) = i;
                 handles.SelectType(2) = 0;
             end
@@ -373,7 +373,7 @@ for i = 1:dimLager(1)
             handles.figSeil3(2) = drawSpring(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),handles.LagerPos(i,1),handles.LagerPos(i,2),handles,0,handles.FederIsOn, handles.kosy);
             handles.figSeil3(1) = plot(punkt(handles.SelectType(1),1),punkt(handles.SelectType(1),2),'bo');
             handles.SelectType(2) = 0;
-            handles.RememTemp(handles.Counter+2+handles.Counter_Point,:) = handles.LagerPos(i,:);
+            handles.RememTemp(handles.Counter+1+handles.Counter_Point,:) = handles.LagerPos(i,:);
             handles.SelectTemp(handles.Counter,2) = 0;
         end
 
