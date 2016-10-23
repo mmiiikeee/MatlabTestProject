@@ -2803,7 +2803,7 @@ for nnvt=160:vnnaa(1,1)-1
     for Iter_Remem3 = 1:row_Remem3/2
         if ~handles.FederIsOn
         [h(nz,3+Iter_Remem3)] = plot([handles.Remem3(2*Iter_Remem3-1,1) handles.Remem3(2*Iter_Remem3,1)],[handles.Remem3(2*Iter_Remem3-1,2) handles.Remem3(2*Iter_Remem3,2)],'b');
-        h(nz,3+row_Remem3/2+1) = 
+        h(nz,3+row_Remem3/2+1) = [];
         end
     end
     
