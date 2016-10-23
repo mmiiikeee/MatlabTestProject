@@ -224,7 +224,7 @@ handles.o3=[];
 handles.o4=[];
 handles.bb=[];
 handles.figSeil=[];
-
+handles.LagerPos=[];
 guidata(hObject, handles);
 
 
