@@ -22,7 +22,7 @@ function varargout = schwingung_analyse(varargin)
 
 % Edit the above text to modify the response to help schwingung_analyse
 
-% Last Modified by GUIDE v2.5 23-Oct-2016 18:41:17
+% Last Modified by GUIDE v2.5 23-Oct-2016 19:33:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,8 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+set(handles.kraftform,'string',{'1','sin','cos','tan'})
+set(handles.kraftform,'units','normalized','Position',[0.93 0.1 0.05 0.1]);
 set(handles.figure1,'units','normalized','Position',[0 0 0.97 0.9]) %Anpassung der GUI Gr?e an den Bildschirm
 set(handles.kosy,'units','centimeters','Position',[1 1 15 15]); %Fl?he f? Animation bereitgestellt
 
@@ -133,14 +135,14 @@ set(handles.k_ok,'units','normalized','Position',[0.7 0.05 0.25 0.1])%Pos: in Pa
 set(handles.kosy,'units','centimeters','Position',[1 1 15 15]); %Fl?he f? Animation bereitgestellt
 set(handles.kosy,'units','centimeters','Position',[1 1 15 15]); %Fl?he f? Animation bereitgestellt
 set(handles.kosy,'units','centimeters','Position',[1 1 15 15]); %Fl?he f? Animation bereitgestellt
-set(handles.abrollbedingung,'units','normalized','Position',[0.75 0.4 .13 .2]); %Fl?he f? Animation bereitgestellt
+set(handles.abrollbedingung,'units','normalized','Position',[0.75 0.75 .13 .2]); %Fl?he f? Animation bereitgestellt
 set(handles.rollen,'units','normalized','Position',[0.15 0.5 .7 .25]); %Fl?he f? Animation bereitgestellt
 set(handles.gleiten,'units','normalized','Position',[0.15 0.2 .7 .25]); %Fl?he f? Animation bereitgestellt
 set(handles.text17,'units','normalized','Position',[0.15 0.85 .4 .1]); %Fl?he f? Animation bereitgestellt
 set(handles.oberflaechenbedingung,'units','normalized','Position',[0.6 0.85 .4 .1]); %Fl?he f? Animation bereitgestellt
 set(handles.dgl_text,'units','normalized','Position',[0.02 0.1 .95 .7]); %Fl?he f? Animation bereitgestellt 
 
-set(handles.dgl,'units','normalized','Position',[0.47 0.05 0.56 0.2])%Position des Pannels DGL
+set(handles.dgl,'units','normalized','Position',[0.47 0.05 0.54 0.2])%Position des Pannels DGL
 set(handles.t1,'units','normalized','Position',[0.045 0.43 0.041 0.18]); %Fl?he f? Animation bereitgestellt 
 set(handles.t2,'units','normalized','Position',[0.092 0.43 0.041 0.18]); %Fl?he f? Animation bereitgestellt 
 set(handles.t3,'units','normalized','Position',[0.045 0.15 0.041 0.18]); %Fl?he f? Animation bereitgestellt 
@@ -955,7 +957,7 @@ function generalK_Callback(hObject, eventdata, handles)
 % hObject    handle to kosyeralK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set(handles.gen_koord,'Visible','on');
+set(handles.generalisierteK,'Visible','on');
  %Counter
 % Read current text and convert it to a number.
 currentCounterValue3 = str2double(get(handles.counter3, 'String'));
@@ -967,7 +969,7 @@ newString3 = sprintf('%d', int32(currentCounterValue3 +1));
 set(handles.counter3, 'String', newString3 );
 handles.currentCounterValue3=currentCounterValue3;
 guidata(hObject,handles);
-set(handles.gen_koord,'units','normalized','Position',[0.5 0.5 0.10 0.15]);
+%set(handles.generalisierteK,'units','normalized','Position',[0.5 0.5 0.10 0.15]);
 set(handles.gen_ko,'String','2');
 set(handles.w_k,'String','0');
 set(handles.x_a,'String','11');
@@ -1436,6 +1438,7 @@ z1=str2double(get(handles.nnvx,'string'));
 z2=str2double(get(handles.nnvdx,'string'));
 z3=str2double(get(handles.nnvy,'string'));
 z4=str2double(get(handles.nnvdy,'string'));
+kf=get(handles.kraftform,'value');
 
 drehung1=0;
 drehung2=0;
@@ -1735,21 +1738,51 @@ end
 t0=0;
 tend=20;
 n=1;
+omega=5;
 [vc]=0;%Neue Vektoren für flüssigere Animation
             [ve]=0;
             [vvc]=0;%Neue Vektoren für flüssigere Animation
             [vve]=0;
 if t2==0&&t3==0&&t4==0
         z0=[z1;z2];
-        ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;t13/t1];
-        [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
+%        ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;t13/t1];
+%        [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
 %         figure(1);
 %         subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
 %         subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
-        [nnvc]=0;%Neue Vektoren für flüssigere Animation
+       
+        if kf==1
+   ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;t13/t1];
+   [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
+ %  subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+ %  subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+  end
+  
+  if kf==2
+   ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;sin(omega*t^n)*t13];
+   [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
+ %  subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+ %  subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+  end
+  
+  if kf==3
+   ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;cos(omega*t^n)*t13];
+   [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
+ %  subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+ %  subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+  end
+  
+  if kf==4
+   ein_massenschwinger = @ (t,z) [0 1;-(t9/t1) -(t5/t1)]*z +[0;tan(omega*t^n)*t13];
+   [t,z]=ode45(ein_massenschwinger,[t0 tend],[z0(1) z0(2)]);
+%   subplot(2,2,1); plot(t,z(:,1));grid on; title('position'); xlabel('t'); ylabel('z-pos');
+%   subplot(2,2,2); plot(t,z(:,2));grid on; title('velocity'); xlabel('t'); ylabel('v');
+  end
+
+             [nnvc]=0;%Neue Vektoren für flüssigere Animation
         [nnve]=0;
         nna=size(t);
-
+        
             for hnnvb=1:nna(1,1)-1
             nnvc(2*hnnvb)=(z(hnnvb+1)+z(hnnvb))/2; %Erzeugung von mehr Koordinaten
             nnvc(2*hnnvb-1)=z(hnnvb);
@@ -2318,13 +2351,13 @@ for nz=1:counter2
     
     if Kreis_Info(nz,4)~=2
         
-    if oh(:,bez_koerper1)==oh(:,nz)
-        
-        Kreis_Info(nz,7)=1;
-        
-    
-    
-    end
+%     if oh(:,bez_koerper1)==oh(:,nz)
+%         
+%         Kreis_Info(nz,7)=1;
+%         
+%     
+%     
+%     end
     
     end
     
@@ -2336,11 +2369,11 @@ for nz=1:counter2
 
     if Kreis_Info(nz,4)~=2
         
-    if oh(:,bez_koerper1)==oh(:,nz)
-        
-        Kreis_Info(nz,7)=1;
-        
-end
+%     if oh(:,bez_koerper1)==oh(:,nz)
+%         
+%         Kreis_Info(nz,7)=1;
+%         
+% end
 
     end
     
@@ -4635,7 +4668,7 @@ function rotte_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.rotate,'Visible','on');
-set(handles.gen_koord,'Visible','off');
+set(handles.generalisierteK,'Visible','off');
 set(handles.rotate,'units','normalized','Position',[0.8 0.5 0.089 0.279])
 
 % --- Executes on button press in transgender.
@@ -4644,7 +4677,7 @@ function transgender_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.gen_co,'Visible','on');
-set(handles.gen_koord,'Visible','off');
+set(handles.generalisierteK,'Visible','off');
 
 
 % --- Executes on button press in positive.
@@ -5384,5 +5417,35 @@ end
 % --- Otherwise, executes on mouse press in 5 pixel border or over oberflaeche.
 function oberflaeche_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to oberflaeche (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in kraftform.
+function kraftform_Callback(hObject, eventdata, handles)
+% hObject    handle to kraftform (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns kraftform contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from kraftform
+
+
+% --- Executes during object creation, after setting all properties.
+function kraftform_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to kraftform (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes when generalisierteK is resized.
+function generalisierteK_SizeChangedFcn(hObject, eventdata, handles)
+% hObject    handle to generalisierteK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
